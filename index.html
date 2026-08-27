@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>數據導航－探索未來學習單答案查詢</title>
+<style>
+  :root{
+    --bg:#f5f7fb;
+    --card:#ffffff;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --line:#dbe2ea;
+    --accent:#2f6f5e;
+    --accent2:#e9f4f0;
+    --danger:#b42318;
+    --shadow:0 10px 30px rgba(15,23,42,.08);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:"Noto Sans TC","Microsoft JhengHei",system-ui,-apple-system,sans-serif;
+    background:linear-gradient(180deg,#eef4f1 0,#f8fafc 260px,#f5f7fb 100%);
+    color:var(--text);
+  }
+  .wrap{
+    max-width:900px;
+    margin:0 auto;
+    padding:36px 18px 56px;
+  }
+  .hero{
+    text-align:center;
+    margin-bottom:24px;
+  }
+  .hero h1{
+    margin:0 0 8px;
+    font-size:clamp(28px,5vw,40px);
+    letter-spacing:.04em;
+  }
+  .hero p{
+    margin:0;
+    color:var(--muted);
+    font-size:15px;
+  }
+  .panel{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:24px;
+    box-shadow:var(--shadow);
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1.4fr;
+    gap:20px;
+  }
+  @media(max-width:700px){
+    .grid{grid-template-columns:1fr}
+  }
+  label.title{
+    display:block;
+    font-weight:800;
+    margin-bottom:8px;
+  }
+  input[type="number"]{
+    width:100%;
+    padding:14px 15px;
+    font-size:18px;
+    border:1px solid #cbd5e1;
+    border-radius:12px;
+    outline:none;
+  }
+  input[type="number"]:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(47,111,94,.12);
+  }
+  .unit-box{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .unit{
+    flex:1 1 220px;
+    position:relative;
+  }
+  .unit input{position:absolute;opacity:0;pointer-events:none}
+  .unit label{
+    display:block;
+    border:1px solid #cbd5e1;
+    border-radius:14px;
+    padding:14px 16px;
+    cursor:pointer;
+    transition:.18s ease;
+    background:#fff;
+    font-weight:700;
+  }
+  .unit input:checked + label{
+    border-color:var(--accent);
+    background:var(--accent2);
+    box-shadow:0 0 0 2px rgba(47,111,94,.1);
+  }
+  .unit small{
+    display:block;
+    color:var(--muted);
+    font-weight:500;
+    margin-top:4px;
+  }
+  .actions{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+    flex-wrap:wrap;
+  }
+  button{
+    border:none;
+    border-radius:12px;
+    padding:13px 18px;
+    font-size:16px;
+    font-weight:800;
+    cursor:pointer;
+  }
+  .primary{
+    background:var(--accent);
+    color:white;
+  }
+  .secondary{
+    background:#eef2f7;
+    color:#334155;
+  }
+  .msg{
+    min-height:24px;
+    margin-top:12px;
+    color:var(--danger);
+    font-weight:700;
+  }
+  .hint{
+    margin-top:10px;
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.6;
+  }
+  #result{
+    margin-top:24px;
+    display:none;
+  }
+  .result-head{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:flex-end;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .result-head h2{
+    margin:0;
+    font-size:24px;
+  }
+  .badge{
+    display:inline-block;
+    margin-top:6px;
+    padding:5px 10px;
+    background:var(--accent2);
+    color:var(--accent);
+    border-radius:999px;
+    font-size:13px;
+    font-weight:800;
+  }
+  .qa{
+    background:white;
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:18px;
+    margin:12px 0;
+    box-shadow:0 4px 14px rgba(15,23,42,.04);
+  }
+  .q{
+    font-weight:900;
+    line-height:1.6;
+    margin-bottom:10px;
+  }
+  .a{
+    background:#f8fafc;
+    border-left:4px solid var(--accent);
+    padding:12px 14px;
+    border-radius:8px;
+    line-height:1.7;
+    font-size:17px;
+  }
+  .footer{
+    text-align:center;
+    color:#94a3b8;
+    margin-top:24px;
+    font-size:12px;
+  }
+  @media print{
+    body{background:white}
+    .panel,.hero p,.footer,.actions,.msg,.hint{display:none!important}
+    .wrap{max-width:none;padding:0}
+    #result{display:block!important;margin-top:0}
+    .qa{box-shadow:none;break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>數據導航－探索未來</h1>
+    <p>輸入座號並選擇學習單單元，即可顯示該座號對應的題目與答案。</p>
+  </div>
+
+  <section class="panel">
+    <div class="grid">
+      <div>
+        <label class="title" for="seat">座號</label>
+        <input id="seat" type="number" inputmode="numeric" placeholder="例如：7" min="1" max="32" />
+        <div class="hint">有效座號：1～15、20～32</div>
+      </div>
+
+      <div>
+        <span class="title">選擇學習單單元</span>
+        <div class="unit-box">
+          <div class="unit">
+            <input type="radio" name="unit" id="u1" value="unit1">
+            <label for="u1">探索未來 1<small>台灣的補習文化</small></label>
+          </div>
+          <div class="unit">
+            <input type="radio" name="unit" id="u2" value="unit2">
+            <label for="u2">探索未來 2<small>各國的補習文化</small></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="showBtn">顯示我的答案</button>
+      <button class="secondary" id="clearBtn" type="button">重新輸入</button>
+    </div>
+    <div class="msg" id="msg"></div>
+  </section>
+
+  <section id="result">
+    <div class="result-head">
+      <div>
+        <h2 id="resultTitle"></h2>
+        <div class="badge" id="studentBadge"></div>
+      </div>
+      <button class="secondary" onclick="window.print()">列印／存成 PDF</button>
+    </div>
+    <div id="qaList"></div>
+  </section>
+
+  <div class="footer">本頁面依座號固定配對答案版本；相同座號每次查詢會得到相同答案。</div>
+</div>
+
+<script>
+const validSeats = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,21,22,23,24,25,26,27,28,29,30,31,32];
+
+const data = {
+  unit1: {
+    title: "探索未來 1｜台灣的補習文化",
+    questions: [
+      "Q1：此折線圖的起始時間與結束時間分別是？",
+      "Q2：根據折線圖，台灣補習班的數量有何變化？",
+      "Q3：此變化中，哪一類的補習班變化最多？",
+      "Q4：小學生上國中後，補習比例及校外學習支出如何變化？",
+      "Q5：根據影片內容，補習的目的是什麼？",
+      "Q6：除了影片內容外，你自己補習或不補習的原因是什麼？"
+    ],
+    answers: [
+      [
+        "2007年到2021年。","從2007年到2021年。","起點2007年，終點2021年。","是2007年至2021年。",
+        "2007年開始，2021年結束。","開始是2007年，結束是2021年。","圖表從2007年畫到2021年。","最早2007年，最後2021年。",
+        "起始年份是2007年。","結束年份是2021年。","2007開始，到2021結束。","從西元2007年看到2021年。",
+        "這張圖統計2007到2021年。","時間範圍是2007～2021年。","圖中從2007年統計到2021年。","是從2007年開始記錄的。",
+        "一直到2021年為止。","前面是2007年，後面是2021年。","2007年是起點，2021年是終點。","資料開始於2007年。",
+        "資料最後到2021年。","大約是2007到2021這段時間。","圖表涵蓋2007年至2021年。","從2007年一路到2021年。",
+        "最開始為2007年，最後為2021年。","起始2007，結束2021。","2007年起，統計到2021年。","這段資料是2007～2021年。"
+      ],
+      [
+        "整體數量沒有太大的變化。","補習班數量大致維持穩定。","整體約在一萬多間上下變動。","數量有升有降，但差距不大。",
+        "補習班總數沒有明顯增加。","整體看起來變化不算大。","數量在一定範圍內上下變化。","大致維持在一萬六到一萬八千間。",
+        "補習班總數算是相對穩定。","有些年份增加，有些年份減少。","整體沒有一直增加或一直減少。","補習班數量呈現上下波動。",
+        "數量雖有改變，但整體很接近。","前後的總數差異並沒有很大。","整體維持在差不多的數量。","補習班沒有因少子化大量消失。",
+        "數量大約維持在一萬多家。","總數先有增加，後來較平穩。","後期增加幅度變得比較小。","補習班總量沒有太明顯的變動。",
+        "整體有波動，但還是維持高數量。","數量並沒有明顯一路下降。","雖然有少子化，補習班仍很多。","整體來看補習班數量差不多。",
+        "各年有增減，但總體算穩定。","補習班一直維持一萬多間。","總數變動不大，但種類有改變。","看圖可發現總數大致保持穩定。"
+      ],
+      [
+        "文理類補習班變化最多。","是文理類補習班。","文理類增加得最明顯。","文理補習班的改變最大。",
+        "我認為是文理類。","增加最多的是文理補習班。","文理類的數量變化最大。","學科相關的文理補習班。",
+        "文理類補習班增加很多。","變化最明顯的是文理類。","文理類的成長最多。","是以課業為主的文理類。",
+        "文理補習班增加的家數最多。","從圖上看是文理類最多。","文理類的上升最明顯。","文理類補習班成長幅度最大。",
+        "最明顯的就是文理補習班。","文理類比其他類別變化更大。","主要改變來自文理補習班。","文理補習班的數量增加最多。",
+        "學科型的文理補習班最多。","文理類的增加幅度最大。","我看到文理類改變最多。","是升學用的文理補習班。",
+        "文理類補習班明顯增加。","文理類是變動最大的類別。","相較之下文理類增加最多。","答案是文理類補習班。"
+      ],
+      [
+        "補習比例下降，但花費增加。","補習的人變少，支出卻變多。","比例降低，但校外學習更花錢。","補習比例減少，花費反而增加。",
+        "上國中後，比例下降、支出上升。","補習人數比例少了，錢花更多。","補習比例變低，但費用提高。","人數比例下降，學習支出增加。",
+        "補習的比例降了，但支出上升。","比例雖然下降，費用卻增加。","上國中後補習比例變少。","但校外學習的花費變高。",
+        "補習比例降低，平均支出提高。","人變少一點，但每人花更多錢。","補習比例少了，支出反而增加。","國中補習比例較低，費用較高。",
+        "參加比例下降，花費卻上升。","補習的人較少，但花的錢較多。","比例往下，校外學習支出往上。","補習率降低，但學習費用增加。",
+        "上國中後花在補習的錢變多。","比例不是變高，但花費增加。","雖然補習比例下降，支出仍增加。","參加的人較少，平均花費變高。",
+        "補習率下降，校外支出增加。","人數比例降低，但家庭花更多錢。","補習比例減少，支出卻沒有減少。","整體是比例下降、支出增加。"
+      ],
+      [
+        "為了讓自己的成績變好。","把學校不會的內容學會。","想加強比較不好的科目。","希望課業不要落後別人。",
+        "可以補足自己不會的地方。","為了準備考試和升學。","想讓自己的學習能力更好。","加強學校上課沒學會的內容。",
+        "希望考試可以考得更好。","為了跟上學校的學習進度。","讓原本會的科目變得更強。","是一種加強課業的方法。",
+        "不想讓自己的成績落後。","可以補救學習不足的地方。","為了增加自己的競爭力。","家長希望孩子有更好的成績。",
+        "把比較弱的科目補起來。","提前學習學校還沒教的內容。","有些人是為了保持好成績。","可以得到學校外的學習幫助。",
+        "為了在考試中有更好的表現。","學不會時可以有人再教一次。","讓自己更容易跟上課程。","有些人補習是為了升學競爭。",
+        "希望自己的課業能力進步。","不只補弱科，也可能加強強科。","讓自己在學習上更有優勢。","補足不足，也讓好的地方更好。"
+      ],
+      [
+        "我數學比較弱，所以有去補習。","父母希望我成績更好，所以補習。","我怕跟不上進度，才去補習。","有不懂的題目可以問補習班老師。",
+        "我想讓考試成績再進步一點。","同學都有補，我也想一起去。","我英文比較不好，所以去加強。","上課有些聽不懂，想再學一次。",
+        "我想提前學，學校上課會比較輕鬆。","家人覺得補習對升學有幫助。","我需要有人督促我寫功課。","在家容易玩手機，所以去補習。",
+        "我希望段考可以考得更好。","我自己想把弱的科目補起來。","我沒有補習，因為自己讀就可以。","我覺得學校上課已經足夠了。",
+        "我不想每天放學後還一直上課。","我想留時間做自己喜歡的事情。","補習費太高，所以沒有參加。","我比較喜歡自己安排讀書進度。",
+        "不會的題目我會直接問老師。","我覺得補習不一定適合每個人。","我想先靠自己讀看看。","回家複習對我來說就夠了。",
+        "我沒有特別需要加強的科目。","我想把時間留給運動和休息。","我補習是因為家長幫我安排的。","我會看自己的需要再決定要不要補。"
+      ]
+    ]
+  },
+
+  unit2: {
+    title: "探索未來 2｜各國的補習文化",
+    questions: [
+      "Q1：什麼是「彌補優勢」？",
+      "Q2：根據文章內容，此文章是否有分析學科能力高低與補習的關聯性？請提出相關依據。",
+      "Q3：「不是只有東亞的國家愛補習」，請找出文章中支持此論點的相關數據。",
+      "Q4：文章中的補習分為哪2種類型？",
+      "Q5：台灣付費補習的比例沒有預期中的高，主要的原因為何？",
+      "Q6：若要證明文章中的「彌補優勢」存在，哪一種類型的孩子參加補習的比例要比較高？"
+    ],
+    answers: [
+      [
+        "有資源的家庭會幫孩子補足弱點。","家境好的孩子落後時，較能得到幫助。","父母用資源補救孩子不好的表現。","家庭條件好，可以幫孩子補回差距。",
+        "有錢的家庭較能幫孩子克服學習問題。","家境好的人較有能力補救孩子的不足。","孩子表現不好時，父母能投入更多資源。","優勢家庭能用補習減少孩子的落後。",
+        "家庭資源多，孩子較容易獲得補救。","父母用補習幫孩子改善較弱的地方。","社經地位高的家庭較有能力補救孩子。","家境好的孩子遇到問題比較有資源處理。",
+        "優勢家庭可以花錢補足孩子的不足。","家庭背景好，能降低孩子落後的影響。","父母有資源，就能協助孩子追上別人。","家境較好的人有更多機會補救課業。",
+        "用家庭資源減少孩子原本的不利影響。","有能力的父母會投資孩子較弱的地方。","優勢家庭可用補習彌補學習上的弱點。","家庭條件好，遇到落後時比較能補回來。",
+        "父母透過家教或補習幫孩子補強。","家境好使孩子較容易克服學習落後。","資源多的家庭能幫孩子減少負面影響。","孩子能力不足時，家庭資源可以補救。",
+        "家庭優勢能拿來彌補孩子學習上的不足。","有資源的父母較能幫孩子改善表現。","家境越有優勢，越有能力替孩子補強。","父母用額外資源避免孩子一直落後。"
+      ],
+      [
+        "有，以PISA的解決問題能力來分析。","有，比較不同能力學生的補習情形。","有，文章有分析能力高低和補習比例。","有，低能力者在許多國家較常補習。",
+        "有，多數國家低能力者較常付費補習。","有，台灣的結果和很多國家不太一樣。","有，台灣高能力者反而較常付費補習。","有，南韓高能力學生也較常付費補習。",
+        "有，以解決問題能力比較補習差異。","有，能力不同的學生補習機率也不同。","有，研究比較了高低能力學生的補習率。","有，文章把能力和補習資料一起比較。",
+        "有，多數國家能力越低越可能去補習。","有，但各國出現的結果並不完全相同。","有，付費和免費補習都有分析能力差異。","有，研究用PISA能力分數做比較。",
+        "有，低能力學生通常較需要補習。","有，但台灣付費補習呈現相反情況。","有，台韓高能力者也常參加付費補習。","有，文章直接比較能力與補習的關係。",
+        "有，能力高低是研究分析的其中一項。","有，研究看不同能力誰比較容易去補習。","有，解決問題能力是文章的重要指標。","有，多國低能力學生較容易參加補習。",
+        "有，免費補習也常集中在低能力學生。","有，能力越低不一定在每國都更常補習。","有，各國能力和補習的關係有所不同。","有，PISA資料顯示兩者具有關聯。"
+      ],
+      [
+        "俄羅斯的總補習率也超過八成。","俄羅斯補習率約在80％到85％。","波蘭的總補習率也接近八成。","英國的補習率也接近六成。",
+        "芬蘭補習率也接近60％。","愛沙尼亞也有接近六成學生補習。","義大利補習率也超過六成。","保加利亞也有超過60％學生補習。",
+        "葡萄牙補習比例也超過六成。","比利時的總補習率也超過60％。","不只有亞洲，俄羅斯補習率也很高。","波蘭有接近80％的學生參加補習。",
+        "歐洲不少國家的補習率也超過一半。","英國也有接近六成的學生參加補習。","芬蘭接近60％，顯示不只東亞補習。","俄羅斯甚至是補習率最高的國家之一。",
+        "波蘭的補習比例甚至接近八成。","多個歐洲國家的補習率都超過60％。","俄羅斯補習情況不輸南韓等亞洲國家。","歐洲也有許多國家的學生會去補習。",
+        "全球超過半數國家的補習率達50％以上。","36國中超過一半的國家補習率過半。","俄羅斯、波蘭的補習率都相當高。","英國與北歐國家也有不少學生補習。",
+        "免費補習最高的日本外，歐美也很多。","英國、芬蘭等國的補習率也接近六成。","補習並非亞洲特有，歐洲也很普遍。","數據顯示世界許多國家都有補習文化。"
+      ],
+      [
+        "付費補習和免費補習。","分為付費及免費補習。","一種付費，一種免費。","付費型與免費型補習。",
+        "有收費和不用收費兩種。","要付錢的與免費的補習。","分成「付費」及「免費」。","文章分為付費、免費兩類。",
+        "第一種付費，第二種免費。","有付費補習，也有免費補習。","需要繳費和不需要繳費的。","補習可分成付費與免費。",
+        "收費型補習和免費型補習。","一類要花錢，一類不用花錢。","文章討論付費及免費兩種。","付錢參加和免費參加。",
+        "有收費補習，也有免費課程。","兩類是付費補習、免費補習。","分成需要付費與免費提供。","一個是付費，一個是免費。",
+        "付費課輔及免費課輔。","可分成收費與不收費兩種。","要付費的補習和免費的補習。","文章將補習分成付費、免費。",
+        "收錢的補習及免費的補習。","分為需付費和不需付費。","主要分成付費型、免費型。","就是付費補習跟免費補習。"
+      ],
+      [
+        "因為台灣有學校的第八節課後輔導。","校內課後輔導沒有算進付費補習。","第八節雖收費，但費用比補習班低。","很多學生參加學校的課後輔導。",
+        "台灣有收費較低的校內課後輔導。","PISA沒有把第八節算成付費補習。","部分補習其實是在學校內進行的。","第八節課輔讓付費補習數字被低估。",
+        "校內課輔雖要錢，但不算一般補習。","因為學校已有較便宜的課後輔導。","很多人上第八節，而不是去補習班。","台灣學生可以參加校內課後輔導。",
+        "學校課輔的費用比外面補習便宜。","有些補習需求由學校第八節取代。","第八節課程沒有呈現在PISA數據中。","台灣的課後輔導使數據看起來較低。",
+        "因為有便宜的校內第八節可以參加。","校內課輔只需少量費用，未被算入。","部分學生補課是在學校，不在補習班。","PISA的付費補習沒有包含校內第八節。",
+        "第八節也是課輔，但統計方式不同。","台灣另有學校安排的收費課後輔導。","校內第八節分散了外面補習的需求。","因為台灣學校本身就提供課後輔導。",
+        "第八節收費少，因此不算一般付費補習。","校內課輔使實際補習情況沒有完全呈現。","台灣有特殊的第八節課後輔導制度。","統計沒有完整算到校內的課後輔導。"
+      ],
+      [
+        "高社經、低解決問題能力的學生。","家境好但能力較低的孩子。","高社經家庭中的低能力學生。","家庭條件好、解決能力低的學生。",
+        "有資源但能力較弱的孩子。","高社經背景且能力偏低者。","家境較好但學習能力較弱的人。","高社經家庭的低能力孩子。",
+        "家庭資源多、能力卻較低的學生。","有錢家庭中表現較弱的孩子。","社經地位高但解決能力低的人。","高社經、能力較弱的學生。",
+        "家境優勢但能力不足的孩子。","高社經背景的低能力學生較符合。","家庭條件佳、能力較差的學生。","高社經家庭會較能幫助低能力孩子。",
+        "家境好的低能力者應更常補習。","有家庭優勢但能力較低的孩子。","高社經且問題解決能力低的學生。","家庭資源豐富但能力弱的學生。",
+        "家境好又需要補救的學生。","能力較弱的高社經家庭孩子。","高社經低能力者最能證明此現象。","家境較佳但表現不好的孩子。",
+        "父母有資源的低能力學生。","高社經家庭中需要補救的孩子。","家境優勢、解決問題能力偏低者。","有資源又需要補強的學生。"
+      ]
+    ]
+  }
+};
+
+function getSelectedUnit(){
+  const chosen = document.querySelector('input[name="unit"]:checked');
+  return chosen ? chosen.value : null;
+}
+
+function showAnswers(){
+  const seat = Number(document.getElementById("seat").value);
+  const unitKey = getSelectedUnit();
+  const msg = document.getElementById("msg");
+  const result = document.getElementById("result");
+
+  msg.textContent = "";
+  result.style.display = "none";
+
+  if(!validSeats.includes(seat)){
+    msg.textContent = "請輸入有效座號：1～15、20～32。";
+    return;
+  }
+  if(!unitKey){
+    msg.textContent = "請先選擇「探索未來 1」或「探索未來 2」。";
+    return;
+  }
+
+  const index = validSeats.indexOf(seat);
+  const unit = data[unitKey];
+
+  document.getElementById("resultTitle").textContent = unit.title;
+  document.getElementById("studentBadge").textContent = `座號 ${seat}｜答案版本 ${index + 1}`;
+
+  const qaList = document.getElementById("qaList");
+  qaList.innerHTML = "";
+
+  unit.questions.forEach((q, qi) => {
+    const card = document.createElement("div");
+    card.className = "qa";
+
+    const qEl = document.createElement("div");
+    qEl.className = "q";
+    qEl.textContent = q;
+
+    const aEl = document.createElement("div");
+    aEl.className = "a";
+    aEl.textContent = unit.answers[qi][index];
+
+    card.appendChild(qEl);
+    card.appendChild(aEl);
+    qaList.appendChild(card);
+  });
+
+  result.style.display = "block";
+  result.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+document.getElementById("showBtn").addEventListener("click", showAnswers);
+
+document.getElementById("seat").addEventListener("keydown", e => {
+  if(e.key === "Enter") showAnswers();
+});
+
+document.getElementById("clearBtn").addEventListener("click", () => {
+  document.getElementById("seat").value = "";
+  document.querySelectorAll('input[name="unit"]').forEach(x => x.checked = false);
+  document.getElementById("msg").textContent = "";
+  document.getElementById("result").style.display = "none";
+  document.getElementById("seat").focus();
+});
+</script>
+</body>
+</html>
