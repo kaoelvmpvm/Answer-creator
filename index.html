@@ -1,400 +1,536 @@
-<!DOCTYPE html>
+from pathlib import Path
+import re, base64, json
+
+# 讀取目前修正版 HTML 中的資料
+src = Path("/mnt/data/探索未來_學習單答案查詢_漸進書寫版_修正版.html")
+html_src = src.read_text(encoding="utf-8")
+m = re.search(r'JSON\.parse\(decodeBase64Utf8\("([A-Za-z0-9+/=]+)"\)\)', html_src)
+if not m:
+    raise RuntimeError("找不到原有答案資料")
+data = json.loads(base64.b64decode(m.group(1)).decode("utf-8"))
+
+# 新增 27 組答案：對應 81601-81614、81620-81632
+new_answers = {
+    "unit1": [
+        [
+            "圖表時間是2007年至2021年。","從2007年開始，到2021年結束。","資料涵蓋2007到2021年。",
+            "最早是2007年，最後是2021年。","起始為2007年，結束為2021年。","圖中統計期間為2007～2021年。",
+            "這份資料從2007年記錄到2021年。","2007年是起點，2021年是終點。","統計年份由2007年延伸至2021年。",
+            "圖表的前後年份是2007、2021年。","可看出資料期間為2007至2021年。","時間軸從2007年到2021年。",
+            "最前面的年份是2007年，最後是2021年。","這張折線圖記錄2007～2021年。","資料起於2007年，止於2021年。",
+            "折線圖從2007年開始統計。","圖中的結束年份為2021年。","前端是2007年，末端是2021年。",
+            "統計範圍大約是2007到2021年。","圖表顯示2007年至2021年的資料。","2007年開始記錄，2021年為最後一年。",
+            "時間範圍共從2007年跨到2021年。","起點年份是2007，終點年份是2021。","圖表資料的首尾為2007與2021年。",
+            "從西元2007年一路統計到2021年。","這段折線資料介於2007與2021年。","統計的開始與結束分別為2007、2021年。"
+        ],
+        [
+            "補習班總數整體沒有明顯改變。","數量有上下變動，但大致維持穩定。","整體仍維持在相近的數量。",
+            "補習班數量沒有一路增加或減少。","各年略有增減，整體差距不大。","總數呈現小幅波動的狀況。",
+            "雖有變化，但補習班總量仍相近。","整體數量大致維持在固定範圍。","補習班總數前後差異不明顯。",
+            "資料顯示總數只有些微起伏。","數量大致穩定，沒有劇烈變動。","補習班總量長期維持差不多。",
+            "整體趨勢較平穩，只是中間有波動。","總數有升降，但並沒有大幅改變。","補習班數量長期沒有明顯下降。",
+            "整體仍有很多補習班，數量變化不大。","不同年份有增減，但總體相當穩定。","補習班總數大多落在相近區間。",
+            "從折線看，總數沒有明顯單向趨勢。","補習班數量有波動，但沒有大幅差距。","整體保持穩定，只出現小幅增減。",
+            "補習班總數沒有因時間而大幅改變。","各年份數量接近，只有少量變化。","大致上是維持穩定的狀態。",
+            "雖然類型改變，總數本身變化不多。","補習班家數長期呈現小幅起伏。","整體來看，補習班數量相對穩定。"
+        ],
+        [
+            "文理類補習班的變化最明顯。","變化最多的是文理類補習班。","文理類的補習班增加幅度最大。",
+            "從圖中可看出文理類改變最多。","文理類補習班的數量變動最大。","最明顯的類別是文理類。",
+            "文理類的增加比其他類別明顯。","改變幅度最大的是文理補習班。","文理類補習班成長最突出。",
+            "圖表中以文理類的變化最大。","文理類是主要增加的補習班類型。","文理補習班的家數變動最明顯。",
+            "比較各類後，文理類的改變最多。","增加最明顯的仍是文理類補習班。","文理類在這段期間的變動最大。",
+            "各類型中，文理補習班差異最大。","文理類補習班呈現最大幅度變化。","最有變化的是學科型文理補習班。",
+            "文理類明顯比其他類型增加更多。","可以判斷文理類補習班變化最大。","文理類在圖中的增幅最突出。",
+            "文理補習班是變化最明顯的一類。","以文理類來看，前後差異最大。","文理類補習班的成長幅度最高。",
+            "主要的數量變化來自文理類補習班。","文理類是各補習類別中變動最多的。","比較後可知文理類補習班增加最多。"
+        ],
+        [
+            "補習比例降低，但校外學習支出增加。","上國中後補習率下降，花費卻提高。","參加補習的人變少，但支出變多。",
+            "補習比例下滑，平均校外支出上升。","比例雖下降，家庭花費反而增加。","補習率降低，但每人的學習支出較高。",
+            "上國中後補習比例減少，費用增加。","補習的人較少，校外學習成本卻更高。","比例往下，但花在校外學習的錢變多。",
+            "補習率下降，同時校外教育支出上升。","參加比例降低，家庭支出卻增加。","補習比例變少，但平均支出變高。",
+            "國中階段補習率較低，花費反而較多。","人數比例下降，校外學習費用提高。","補習比例減少，但支出沒有跟著下降。",
+            "上國中後，補習率降低而支出增加。","比例雖少一些，但每月花費反而較高。","補習人數比例下滑，相關費用卻上升。",
+            "補習率下降，但家庭仍投入更多支出。","參加補習的比例降低，花費卻增加。","從資料看是比例下降、支出上升。",
+            "補習比例沒有增加，但校外花費增加。","人變少，平均投入校外學習的錢更多。","補習率降低，校外學習成本則提高。",
+            "補習比例往下，家庭教育支出往上。","國中生補習比例較低，但支出較高。","整體呈現補習率降、學習支出升的情況。"
+        ],
+        [
+            "補足不熟的內容，讓課業表現進步。","加強弱科，避免跟不上學校進度。","透過額外學習提升考試表現。",
+            "把課堂上沒理解的地方重新學會。","為了準備考試，也加強不足的科目。","讓自己在原本較弱的地方得到補強。",
+            "除了補救，也可能提前學習新內容。","希望跟上進度並提高學習成效。","利用課外時間把不熟的內容弄懂。",
+            "補習可以增加練習，也有人協助解題。","主要是加強課業與準備升學。","讓自己有更多時間練習不熟的題型。",
+            "改善較差的科目，也維持原本的優勢。","透過補習增加理解與熟練程度。","把學校沒學好的內容再複習一次。",
+            "希望成績進步，也減少課業落後。","用額外課程補足自己學習上的不足。","增加練習機會，提升考試的穩定度。",
+            "為了補強弱點，也可能追求更好表現。","讓不懂的內容有人可以再次說明。","補習的目的通常是加強學習效果。",
+            "增加學習時間，讓課業更容易掌握。","為升學做準備，也加強自己的弱項。","希望學得更熟，考試時比較有把握。",
+            "透過課後學習維持或提升課業成績。","補足學校課程中還沒理解的部分。","讓自己的學習進度與能力有所提升。"
+        ],
+        [
+            "我想有人幫我整理重點，所以選擇補習。","我有些科目跟不上，補習可以再學一次。","我自己讀書效率較好，所以沒有補習。",
+            "家人希望我有固定讀書時間，因此去補習。","我想加強數學題型，才安排補習課。","放學後想保留休息時間，所以不補習。",
+            "我需要老師協助解題，因此有參加補習。","自己複習就能理解，所以目前沒有補習。","為了準備段考，我會去加強較弱的科目。",
+            "補習班能督促我讀書，對我比較有幫助。","我想自己安排進度，因此沒有參加補習。","英文基礎較弱，我希望透過補習改善。",
+            "家長幫我安排課程，我也想試著加強課業。","我比較容易在團體課程中專心，所以補習。","學校課程已經足夠，我選擇回家自己複習。",
+            "我希望有人檢查學習狀況，因此去補習。","補習時間太長，我想把時間留給其他活動。","我有不懂的內容時，補習班能立即詢問。",
+            "我想提升考試穩定度，所以有固定補習。","我習慣利用線上資源，因此沒有去補習班。","家裡希望我提前學習，所以安排補習。",
+            "我覺得自己的弱科需要更多練習，因此補習。","不補習是因為我能自己規劃讀書與訂正。","我希望增加練習量，讓段考比較有把握。",
+            "補習費用較高，所以我會先靠自己學習。","我需要固定環境讀書，因此選擇補習。","是否補習要看科目需求，我不會每科都補。"
+        ]
+    ],
+    "unit2": [
+        [
+            "彌補優勢是優勢家庭用資源補救孩子弱項。","家境較好時，孩子落後較容易得到補救。","高社經家庭能投入資源降低孩子的學習不利。",
+            "家庭條件較好，可用補習協助孩子追上。","有資源的家庭能減少孩子表現不佳的影響。","父母資源較多時，更能幫孩子補足不足。",
+            "孩子遇到學習問題時，優勢家庭較能介入。","家庭優勢能轉化成孩子的補救學習機會。","高社經家庭較有能力替弱勢表現進行補強。",
+            "所謂彌補優勢，就是用家庭資源補回落後。","家境好能讓孩子在落後時得到更多協助。","優勢家庭可透過補習降低孩子持續落後的可能。",
+            "家庭資源越充足，越能處理孩子的學習弱點。","孩子表現不好時，高社經家庭較能提供補救。","彌補優勢反映家庭資源能減少學習上的不利。",
+            "父母能投入家教或補習，幫孩子補足差距。","高社經背景能提供孩子更多補救學習資源。","家庭條件佳時，孩子較不容易因落後持續受影響。",
+            "優勢家庭能用額外教育資源協助孩子改善。","家境較好的父母較能替孩子補強不足。","彌補優勢是利用既有資源減少孩子的落後。",
+            "家庭社經條件佳，能增加孩子補救的機會。","資源多的家庭較能在孩子落後時提供支持。","家庭優勢可用來彌補孩子能力較弱的部分。",
+            "高社經家庭能透過教育投入改善孩子表現。","彌補優勢表示家庭資源能抵銷部分學習不利。","有資源的父母較能避免孩子因弱項持續落後。"
+        ],
+        [
+            "有，文章用PISA解決問題能力比較補習情形。","有，研究分析高低能力學生參加補習的差異。","有，但文章使用的是解決問題能力指標。",
+            "有，多數國家低能力學生較常參加付費補習。","有，資料比較能力高低與補習機率的關係。","有，PISA數據被用來分析能力與補習狀況。",
+            "有，文章指出不同能力學生的補習比例不同。","有，研究將解決問題能力和補習情形交叉比較。","有，部分國家能力越低，付費補習比例越高。",
+            "有，而且台灣的結果與多數國家並不相同。","有，台灣高能力學生反而較常參加付費補習。","有，文章比較了高低能力者的補習可能性。",
+            "有，依據是PISA的解決問題能力評測資料。","有，研究觀察能力差異是否影響補習參與。","有，文中同時討論能力高低與付費、免費補習。",
+            "有，多國低能力學生較常補習就是相關證據。","有，但不同國家的能力與補習關係並不一致。","有，研究以能力分組後比較學生的補習比例。",
+            "有，解決問題能力是研究中的重要分析變項。","有，文章說明能力較弱者在多國更常補習。","有，台灣與南韓甚至出現相反的能力關係。",
+            "有，研究不是只看補習率，也比較學生能力。","有，PISA資料顯示能力與補習在部分國家相關。","有，文章以跨國資料分析能力和補習的關聯。",
+            "有，可從高低能力學生的補習比例比較得知。","有，研究直接檢驗能力高低是否影響補習機率。","有，文章用解決問題能力而非單科成績判斷。"
+        ],
+        [
+            "俄羅斯補習率達80％以上，顯示不限東亞。","波蘭補習率接近80％，也是明顯例子。","俄羅斯與波蘭都有很高的補習比例。",
+            "英國、芬蘭等國的補習率也接近60％。","葡萄牙補習率超過60％，可支持此說法。","義大利補習率超過六成，並非只有東亞。",
+            "保加利亞超過60％學生有補習經驗。","俄羅斯約80％～85％，補習情況相當普遍。","波蘭接近80％，顯示歐洲也有補習文化。",
+            "比利時補習率超過60％，不是東亞國家。","愛沙尼亞接近60％，也有不少學生補習。","芬蘭接近六成學生補習，可反駁東亞限定。",
+            "英國補習率接近60％，顯示現象跨地區。","全球超過半數國家的補習率都高於50％。","36國中超過一半國家補習率達50％以上。",
+            "俄羅斯補習率甚至高於多數亞洲地區。","波蘭接近八成，證明歐洲同樣重視補習。","葡萄牙、義大利等國也都超過六成。",
+            "英國與北歐國家也有接近六成補習率。","補習率高的國家中也包含俄羅斯與波蘭。","歐洲多國補習率超過一半，並非東亞特有。",
+            "俄羅斯約八成以上學生補習，是重要證據。","波蘭近八成學生補習，可支持跨國現象。","英國接近六成，也代表西方國家會補習。",
+            "芬蘭接近60％，說明補習並不限於亞洲。","多個歐洲國家的補習率都在60％左右。","數據顯示補習是全球現象，不只出現在東亞。"
+        ],
+        [
+            "文章將補習分成付費補習與免費補習。","兩種類型分別是付費型與免費型補習。","依是否收費，可分為付費與免費補習。",
+            "一類需要付費，另一類是不收費補習。","文章比較的是付費補習和免費補習。","補習被分為收費型以及免費型兩類。",
+            "研究將課後補習區分成付費與免費兩種。","分類方式是需付費與不需付費的補習。","文章中的兩類為付費補習、免費補習。",
+            "可依費用分成付費和免費兩種類型。","一種由家庭付費，另一種免費提供。","文章討論的補習形式有收費與免費兩種。",
+            "研究分別分析付費補習和免費補習。","補習主要被區分成付費及免費課程。","兩種就是需要繳費與不需要繳費的補習。",
+            "依文章分類，可分為付費型和免費型。","研究同時比較收費補習與免費補習。","文章沒有細分科目，而是分付費和免費。",
+            "補習依是否收費被分成兩種類型。","一類是家庭付費，一類是免費參加。","文中的補習類型為付費、免費兩類。",
+            "文章把補習分為收費和免收費兩種。","主要分類標準是有沒有支付補習費用。","研究中的兩組是付費補習與免費補習。",
+            "可簡單分成要付錢和不用付錢的補習。","文章以付費與免費作為補習的分類方式。","補習在研究中被分成付費型、免費型。"
+        ],
+        [
+            "因第八節雖收費，PISA卻未列為付費補習。","台灣有校內課後輔導，未被算入付費補習。","第八節收費較低，但不在PISA付費補習統計內。",
+            "部分補習需求由學校第八節吸收，因此比例較低。","不少學生上校內課輔，數據未完全反映付費情形。","台灣第八節也收費，卻不屬於統計中的付費補習。",
+            "校內課後輔導未算進去，使付費比例看起來較低。","學校提供便宜課輔，部分學生不需另外去補習班。","PISA沒有把台灣第八節視為一般付費補習。",
+            "台灣學生常參加第八節，因此外部付費比例被分散。","校內課輔只收少量費用，統計分類與補習班不同。","第八節提供補習功能，但沒有被列入付費補習。",
+            "部分學生的課後學習發生在校內，未被完整統計。","台灣學校有收費課輔，使付費補習數據被低估。","因第八節制度存在，實際課後學習可能比數據高。",
+            "校內第八節取代部分補習班需求，造成比例不高。","PISA統計沒有完整呈現台灣校內收費課輔。","學校課後輔導便宜，也讓學生不一定去外面補習。",
+            "第八節雖具補習性質，但統計方式不同。","台灣的校內課輔使付費補習比例低於直覺。","不少學生在學校延長學習，而非參加校外補習。",
+            "收費第八節未計入，使台灣付費補習率偏低。","校內課後輔導分散了校外付費補習的人數。","台灣有特殊的第八節制度，影響統計結果。",
+            "第八節費用低且分類不同，因此沒有反映在比例中。","部分付費學習藏在校內課輔，所以數字不如預期高。","主要是第八節未被PISA當成一般付費補習。"
+        ],
+        [
+            "應是高社經但解決問題能力低的學生。","高社經家庭中的低能力孩子補習率應較高。","家境佳、解決問題能力低者應更常補習。",
+            "若存在彌補優勢，高社經低能力者比例會較高。","有家庭資源但能力較弱的學生應較常補習。","高社經背景且解決問題能力偏低者最符合。",
+            "應觀察家境好但能力較低的學生是否更常補習。","高社經家庭的低能力學生補習率要較高。","有資源家庭中的弱能力者應有較多補習機會。",
+            "能證明的組合是高社經、低解決問題能力。","家庭條件佳但能力不足者應較常接受補習。","高社經低能力學生若補習較多，就支持此理論。",
+            "應是社經背景高、解決問題能力低的孩子。","家境較好且能力偏低者的補習比例需較高。","高社經家庭能補救弱項，因此低能力者應較常補習。",
+            "若高社經低能力組最常補習，就符合彌補優勢。","應比較高社經家庭中能力較低學生的補習率。","家庭資源多但能力弱的學生最能檢驗此概念。",
+            "高社經且能力低的學生需要有較高補習比例。","家境好、能力較弱者更常補習才支持彌補優勢。","應出現高社經低能力者比低社經者更常補習。",
+            "高社經家庭若優先補救弱能力孩子，即可支持理論。","有資源又能力不足的學生應最容易參加補習。","重點是高社經家庭中的低能力學生補習較多。",
+            "若家境佳的低能力者補習率高，就符合彌補優勢。","高社經、低能力的組合應呈現較高補習比例。","要證明此概念，應看到優勢家庭補救弱能力孩子。"
+        ]
+    ],
+    "unit4": [
+        [
+            "休退學比率整體上升，近二十年增幅明顯。","資料顯示休退學率長期呈現上升趨勢。","從早期到後期，休退學比例明顯增加。",
+            "歷年休退學率逐步提高，後期高於早期。","整體趨勢往上，近年休退學比例較高。","休退學比率長期增加，並非短期波動而已。",
+            "資料呈現持續上升，近年比過去明顯偏高。","從圖表可判斷，大學生休退學率逐年提高。","長期來看，休退學比例有明顯增加現象。",
+            "休退學率由低往高發展，整體呈上升趨勢。","近二十年休退學比例成長幅度相當明顯。","資料顯示後期休退學率已高於早期許多。",
+            "休退學比率大致持續增加，沒有明顯回落。","整體從較低比例逐漸上升到較高比例。","大學生休退學情形在近年變得更常見。",
+            "長期數據顯示休退學率呈現明顯上升。","圖表反映休退學比例隨時間逐漸增加。","後期的休退學率明顯高於前期，趨勢向上。",
+            "歷年資料不是持平，而是逐步增加。","整體變化可概括為休退學比例持續上升。","休退學率從早期低點逐漸升至較高水準。",
+            "數據顯示近年休退學比例比過去高出不少。","整體趨勢明確向上，代表休退學情況增加。","從長期資料看，休退學率有持續提高現象。",
+            "前後相比，後期休退學比率明顯較高。","休退學比例逐年增加，顯示問題值得關注。","資料呈現上升走勢，且累積增幅相當明顯。"
+        ],
+        [
+            "志趣不合是重要原因，反映選系與興趣有落差。","許多學生進大學後才發現所學不符合興趣。","升學過度看分數，可能讓學生忽略適性選擇。",
+            "缺少生涯探索，容易造成入學後志趣不合。","選系時若只看成績，之後較可能產生不適應。","學生不熟悉自己興趣，可能導致休學或轉換方向。",
+            "志趣不合比例高，顯示生涯規劃仍需要加強。","升學前缺少探索，進大學後才發現科系不適合。","課業壓力與興趣落差都可能提高休退學可能。",
+            "若只追求熱門科系，可能忽略自己的能力與興趣。","學生對科系內容認識不足，也可能造成後來退學。","缺少適性教育，使部分學生選到不適合的方向。",
+            "主要問題在選擇與興趣不一致，而非單純成績差。","志趣不合占比高，代表選系前探索不足。","生涯資訊不足，會讓學生做出不適合自己的選擇。",
+            "考試導向可能使學生重分數，卻忽略長期興趣。","如果沒有認識自己，進大學後容易產生方向落差。","休退學增加可能和科系選擇不符合期待有關。",
+            "學生缺少職涯理解，選系後才發現內容不適合。","適性探索不足，是志趣不合的重要背景因素。","升學決策若缺少興趣考量，容易增加後悔與轉換。",
+            "課程若少了生涯教育，學生較難提早確認方向。","選校選系只依成績，可能造成後續學習動機降低。","學生對未來想像不足，容易在大學階段重新選擇。",
+            "志趣與科系不合，反映中學階段探索仍不夠。","生涯規劃不足可能使學生入學後失去學習動力。","資料顯示選擇不適合自己的方向是關鍵因素。"
+        ],
+        [
+            "我會增加生涯探索課，讓學生提早認識興趣與能力。","我會安排職場體驗，讓學生了解不同工作的真實內容。","我會保留學科基礎，再加入生涯、理財與實作課。",
+            "每週增加探索課，幫助學生在升學前確認方向。","我會安排跨領域專題，讓學生從實作發現自己的優勢。","課程應加入職業訪談，使學生理解工作需要的能力。",
+            "我會增加選修時間，讓學生依興趣嘗試不同領域。","除了考科，我會安排生活理財與職涯規劃課程。","我會讓學生做興趣探索，再連結科系與職業資訊。",
+            "每週安排實作課，避免學生只靠分數判斷未來。","我會加入職場參訪，讓選系前有更具體的認識。","課程要兼顧學科與探索，使學生了解自己適合什麼。",
+            "我會設計生涯專題，讓學生研究科系、工作與生活。","增加自主選修，讓學生有機會測試真正的興趣。","我會把生涯教育固定排入課表，而不是只辦一次活動。",
+            "每週保留探索時段，讓學生練習做升學與職涯決策。","我會安排職人分享，讓學生比較想像與真實工作差異。","課程中加入理財，讓學生思考工作收入與生活需求。",
+            "我會增加實作與體驗，幫助學生判斷是否真的有興趣。","除了升學知識，也應教學生蒐集與判讀職涯資訊。","我會規劃多元選修，讓學生在國中先接觸不同領域。",
+            "每週安排生涯課，讓學生逐步建立自己的未來方向。","我會結合職業體驗與反思，讓選擇更有依據。","課程要讓學生了解能力、興趣與職業之間的關係。",
+            "我會降低重複練習比例，把時間留給探索與實作。","增加科系認識活動，避免學生只憑名稱選擇未來。","我會設計學科、實作、生涯並重的一週課程。"
+        ]
+    ]
+}
+
+# 27 組探索未來5資料
+budgets = [
+    (9000,1800,14500,2600,2200,3000,3000),
+    (8500,2200,15500,2400,1800,3200,2800),
+    (9200,1600,13500,3000,2500,2800,3200),
+    (8800,2000,16000,2200,2000,3500,2500),
+    (9500,1800,15000,2800,2300,2700,3000),
+    (8200,1500,14000,2500,1800,3000,2700),
+    (9000,2100,17000,2600,2000,3000,3300),
+    (8700,1800,14500,3200,2400,2600,2900),
+    (9800,2200,16000,2500,1800,3400,3100),
+    (8300,1700,13500,2800,2200,3100,2600),
+    (9100,1900,15000,3000,2600,2800,3200),
+    (8600,1600,14500,2400,2000,3600,2800),
+    (9400,2000,16500,2700,2300,3000,3000),
+    (8000,1800,14000,2600,2100,2900,2700),
+    (9000,2300,15500,2900,2500,3200,3100),
+    (8900,1700,15000,2500,1800,3300,3000),
+    (9600,2000,17000,3000,2200,2800,3400),
+    (8400,1600,14500,2700,2400,3000,2800),
+    (9200,2100,16000,2400,2000,3500,3200),
+    (8700,1900,15000,3100,2300,2700,2900),
+    (9500,1800,15500,2600,2500,3100,3300),
+    (8100,1700,14000,2900,1900,3200,2700),
+    (9300,2200,16500,2800,2400,2900,3100),
+    (8600,1800,15000,2500,2100,3400,3000),
+    (9700,2000,17000,2700,2300,3300,3500),
+    (8500,1600,14500,3000,2200,2800,2900),
+    (9000,1900,16000,2600,2500,3200,3100),
+]
+
+career_rows = [
+    ("臨床心理師","約45,000～65,000元","心理相關研究所、專業證照","評估心理狀況並提供諮商","修心理相關課程並了解證照制度"),
+    ("社會工作師","約38,000～52,000元","社工科系、社工師證照","協助個案連結福利與支持","參與服務活動並認識社工工作"),
+    ("語言治療師","約45,000～65,000元","語言治療科系、專業證照","評估並改善溝通與吞嚥問題","加強生物並了解醫療相關科系"),
+    ("呼吸治療師","約43,000～60,000元","呼吸治療科系、專業證照","照護呼吸疾病與操作醫療設備","加強生物理化並了解醫療職涯"),
+    ("視光師","約40,000～58,000元","視光科系、驗光相關證照","檢查視力並提供視光服務","加強自然科並認識視光專業"),
+    ("食品技師","約42,000～60,000元","食品科系、食品技師資格","管理食品安全與品質流程","學好化學生物並了解食品產業"),
+    ("環境工程師","約45,000～65,000元","環工科系、分析與工程能力","處理污染與規劃環境工程","加強理化數學並參與環境專題"),
+    ("化學工程師","約48,000～70,000元","化工科系、化學與製程能力","設計與改善化學製造流程","加強化學數學並了解製程產業"),
+    ("材料工程師","約48,000～72,000元","材料科系、理化與實驗能力","研發材料並分析產品性能","加強理化並累積實驗探究經驗"),
+    ("自動化工程師","約50,000～75,000元","電機機械背景、控制程式能力","設計自動化設備與控制系統","加強程式與電機機械基礎"),
+    ("韌體工程師","約55,000～80,000元","資訊電機科系、程式能力","撰寫硬體裝置的控制程式","學C語言並加強電子電路基礎"),
+    ("網路工程師","約45,000～65,000元","資訊科系、網路與系統能力","建置維護網路與排除異常","練習網路技術並了解相關證照"),
+    ("雲端工程師","約55,000～85,000元","資訊背景、系統與雲端技能","建置維護雲端服務與系統","學Linux並累積雲端平台實作"),
+    ("品質工程師","約45,000～65,000元","理工背景、統計與分析能力","檢查品質並改善製造問題","加強數學統計與問題分析能力"),
+    ("採購專員","約40,000～58,000元","商管背景、溝通與議價能力","尋找供應商並管理採購成本","練習溝通並了解企業採購流程"),
+    ("人力資源專員","約40,000～58,000元","商管心理背景、溝通能力","招募人才並協助員工制度","加強溝通並了解人資工作內容"),
+    ("國際貿易專員","約42,000～62,000元","商管背景、英文與貿易知識","處理國際訂單與客戶聯繫","加強英文並學習國際貿易知識"),
+    ("銀行行員","約40,000～60,000元","商管背景、金融與服務能力","辦理金融業務並服務客戶","加強數學並認識金融相關科系"),
+    ("法務專員","約45,000～65,000元","法律科系、法規閱讀能力","審閱合約並處理法律事務","培養閱讀論證並了解法律科系"),
+    ("影片剪輯師","約38,000～60,000元","影視背景、剪輯與敘事能力","剪輯影片並完成影音後製","練剪輯軟體並累積影音作品"),
+    ("動畫設計師","約40,000～65,000元","設計背景、繪圖與動畫能力","製作角色動畫與視覺內容","練繪圖動畫並建立作品集"),
+    ("遊戲企劃","約42,000～65,000元","企劃能力、遊戲理解與溝通","設計玩法並協調遊戲開發","分析遊戲並練習企劃文件"),
+    ("電子商務企劃","約40,000～60,000元","商管背景、數據與行銷能力","經營網路商店與規劃活動","學數據分析並觀察電商市場"),
+    ("旅館營運管理","約38,000～55,000元","觀光背景、服務與管理能力","管理住宿服務與現場營運","加強英文並累積服務經驗"),
+    ("運動教練","約38,000～60,000元","運動專長、教練相關資格","規劃訓練並指導運動技巧","持續訓練並了解教練證照"),
+    ("消防設備師","約45,000～70,000元","理工背景、消防專業證照","設計檢查消防安全設備","加強理化並了解消防設備法規"),
+    ("地政士","約40,000～65,000元","地政法律知識、專業證照","辦理土地登記與不動產文件","培養法規閱讀並了解地政考試"),
+]
+
+unit5_q1 = []
+unit5_q2 = []
+for b, c in zip(budgets, career_rows):
+    food, clothing, housing, transport, education, leisure, misc = b
+    total = sum(b)
+    unit5_q1.append(
+        f"食：{food:,}元\n衣：{clothing:,}元\n住：{housing:,}元\n行：{transport:,}元\n"
+        f"育：{education:,}元\n樂：{leisure:,}元\n雜：{misc:,}元\n總計：{total:,}元"
+    )
+    job, salary, cond, work, action = c
+    # 取薪資區間最低值估算最低差距
+    low = int(re.search(r'約([\d,]+)', salary).group(1).replace(",", ""))
+    gap = low - total
+    if gap >= 8000:
+        judgment = "最低薪資高於需求，仍有儲蓄與調整空間。"
+    elif gap >= 0:
+        judgment = "最低薪資可支應預算，但需要控制額外支出。"
+    else:
+        judgment = "起薪可能不足，需提升能力或調整生活預算。"
+    unit5_q2.append(
+        f"淨收入需求：{total:,}元\n職業：{job}\n月薪：{salary}\n"
+        f"條件：{cond}\n工作：{work}\n最低差距：{gap:,}元\n判斷：{judgment}\n行動：{action}"
+    )
+
+new_answers["unit5"] = [unit5_q1, unit5_q2]
+
+# 加入原資料
+for unit_key, unit_new in new_answers.items():
+    for qi, new_group in enumerate(unit_new):
+        if len(new_group) != 27:
+            raise RuntimeError(f"{unit_key} 第{qi+1}題新增答案不是27組")
+        data[unit_key]["answers"][qi].extend(new_group)
+
+# 檢查全部單元變成55組
+for unit_key, unit in data.items():
+    for qi, group in enumerate(unit["answers"], 1):
+        if len(group) != 55:
+            raise RuntimeError(f"{unit_key} Q{qi} 目前為{len(group)}組，不是55組")
+
+# 新座號：815 共28人，816 共27人
+valid_seats = (
+    [f"815{i:02d}" for i in range(1,16)] +
+    [f"815{i:02d}" for i in range(20,33)] +
+    [f"816{i:02d}" for i in range(1,15)] +
+    [f"816{i:02d}" for i in range(20,33)]
+)
+assert len(valid_seats) == 55 and len(set(valid_seats)) == 55
+
+# Base64 安全嵌入資料
+json_text = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+data_b64 = base64.b64encode(json_text.encode("utf-8")).decode("ascii")
+seat_js = json.dumps(valid_seats, ensure_ascii=False)
+
+# 重新製作 HTML，避免沿用舊座號邏輯
+out_html = f"""<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>數據導航｜探索未來答案查詢</title>
 <style>
-:root {
-  --bg:#f4f7f6;
-  --card:#ffffff;
-  --ink:#1f2937;
-  --muted:#64748b;
-  --line:#d9e2df;
-  --main:#315f54;
-  --soft:#eaf3f0;
-  --warn:#b42318;
-}
-* { box-sizing:border-box; }
-body {
-  margin:0;
-  font-family:"Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif;
+:root {{
+  --ink:#1f2937; --muted:#64748b; --line:#d9e2df;
+  --main:#315f54; --soft:#eaf3f0; --warn:#b42318;
+}}
+*{{box-sizing:border-box}}
+body{{
+  margin:0;font-family:"Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif;
   background:linear-gradient(180deg,#eaf2ef 0,#f8fafc 300px,#f4f7f6 100%);
   color:var(--ink);
-}
-.wrap {
-  max-width:920px;
-  margin:auto;
-  padding:34px 18px 60px;
-}
-header {
-  text-align:center;
-  margin-bottom:22px;
-}
-h1 {
-  margin:0 0 8px;
-  font-size:clamp(27px,5vw,40px);
-  letter-spacing:.04em;
-}
-header p {
-  margin:0;
-  color:var(--muted);
-  line-height:1.7;
-}
-.panel {
-  background:var(--card);
-  border:1px solid var(--line);
-  border-radius:20px;
-  padding:24px;
-  box-shadow:0 10px 30px rgba(15,23,42,.07);
-}
-.form-grid {
-  display:grid;
-  grid-template-columns:220px 1fr;
-  gap:22px;
-}
-@media (max-width:720px) {
-  .form-grid { grid-template-columns:1fr; }
-}
-.title {
-  display:block;
-  font-weight:800;
-  margin-bottom:9px;
-}
-input[type=number] {
-  width:100%;
-  padding:13px 14px;
-  border:1px solid #cbd5e1;
-  border-radius:12px;
-  font-size:18px;
-  outline:none;
-}
-input[type=number]:focus {
-  border-color:var(--main);
-  box-shadow:0 0 0 3px rgba(49,95,84,.12);
-}
-.seat-hint {
-  color:var(--muted);
-  font-size:13px;
-  margin-top:7px;
-}
-.units {
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:10px;
-}
-@media (max-width:520px) {
-  .units { grid-template-columns:1fr; }
-}
-.unit {
-  position:relative;
-}
-.unit input {
-  position:absolute;
-  opacity:0;
-  pointer-events:none;
-}
-.unit label {
-  display:block;
-  min-height:72px;
-  padding:13px 15px;
-  border:1px solid #cbd5e1;
-  border-radius:14px;
-  cursor:pointer;
-  font-weight:800;
-  background:#fff;
-  transition:.16s ease;
-}
-.unit label small {
-  display:block;
-  margin-top:5px;
-  color:var(--muted);
-  font-weight:500;
-}
-.unit input:checked + label {
-  border-color:var(--main);
-  background:var(--soft);
-  box-shadow:0 0 0 2px rgba(49,95,84,.10);
-}
-.actions {
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:20px;
-}
-button {
-  border:0;
-  border-radius:12px;
-  padding:12px 18px;
-  font-size:16px;
-  font-weight:800;
-  cursor:pointer;
-}
-button:focus-visible {
-  outline:3px solid rgba(49,95,84,.25);
-  outline-offset:2px;
-}
-.primary { background:var(--main); color:#fff; }
-.secondary { background:#edf1f4; color:#334155; }
-#message {
-  min-height:23px;
-  margin-top:11px;
-  color:var(--warn);
-  font-weight:700;
-}
-#result {
-  display:none;
-  margin-top:24px;
-}
-.result-head {
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-end;
-  gap:12px;
-  flex-wrap:wrap;
-  margin-bottom:14px;
-}
-.result-head h2 {
-  margin:0;
-  font-size:24px;
-}
-.badge {
-  display:inline-block;
-  margin-top:7px;
-  padding:5px 10px;
-  background:var(--soft);
-  color:var(--main);
-  border-radius:999px;
-  font-size:13px;
-  font-weight:800;
-}
-.note {
-  display:none;
-  margin:0 0 14px;
-  padding:11px 14px;
-  background:#fff8e8;
-  border:1px solid #f0d99b;
-  border-radius:12px;
-  color:#6b5315;
-  line-height:1.6;
-  font-size:14px;
-}
-.qa {
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:16px;
-  padding:18px;
-  margin:12px 0;
-  box-shadow:0 4px 14px rgba(15,23,42,.04);
-}
-.q {
-  font-weight:900;
-  line-height:1.65;
-  margin-bottom:10px;
-}
-.a {
-  background:#f8fafc;
-  border-left:4px solid var(--main);
-  border-radius:8px;
-  padding:12px 14px;
-  line-height:1.75;
-  font-size:17px;
-  white-space:pre-line;
-}
-footer {
-  text-align:center;
-  color:#94a3b8;
-  font-size:12px;
-  margin-top:24px;
-  line-height:1.7;
-}
-@media print {
-  body { background:#fff; }
-  header p,.panel,.actions,footer { display:none !important; }
-  .wrap { max-width:none; padding:0; }
-  #result { display:block !important; margin-top:0; }
-  .qa { box-shadow:none; break-inside:avoid; }
-}
+}}
+.wrap{{max-width:920px;margin:auto;padding:34px 18px 60px}}
+header{{text-align:center;margin-bottom:22px}}
+h1{{margin:0 0 8px;font-size:clamp(27px,5vw,40px);letter-spacing:.04em}}
+header p{{margin:0;color:var(--muted);line-height:1.7}}
+.panel{{
+  background:#fff;border:1px solid var(--line);border-radius:20px;padding:24px;
+  box-shadow:0 10px 30px rgba(15,23,42,.07)
+}}
+.form-grid{{display:grid;grid-template-columns:240px 1fr;gap:22px}}
+@media(max-width:720px){{.form-grid{{grid-template-columns:1fr}}}}
+.title{{display:block;font-weight:800;margin-bottom:9px}}
+input[type=text]{{
+  width:100%;padding:13px 14px;border:1px solid #cbd5e1;border-radius:12px;
+  font-size:18px;outline:none
+}}
+input[type=text]:focus{{border-color:var(--main);box-shadow:0 0 0 3px rgba(49,95,84,.12)}}
+.seat-hint{{color:var(--muted);font-size:13px;margin-top:7px;line-height:1.6}}
+.units{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
+@media(max-width:520px){{.units{{grid-template-columns:1fr}}}}
+.unit{{position:relative}}
+.unit input{{position:absolute;opacity:0;pointer-events:none}}
+.unit label{{
+  display:block;min-height:72px;padding:13px 15px;border:1px solid #cbd5e1;
+  border-radius:14px;cursor:pointer;font-weight:800;background:#fff;transition:.16s ease
+}}
+.unit label small{{display:block;margin-top:5px;color:var(--muted);font-weight:500}}
+.unit input:checked+label{{border-color:var(--main);background:var(--soft);box-shadow:0 0 0 2px rgba(49,95,84,.10)}}
+.actions{{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}}
+button{{border:0;border-radius:12px;padding:12px 18px;font-size:16px;font-weight:800;cursor:pointer}}
+.primary{{background:var(--main);color:#fff}}
+.secondary{{background:#edf1f4;color:#334155}}
+#message{{min-height:23px;margin-top:11px;color:var(--warn);font-weight:700}}
+#result{{display:none;margin-top:24px}}
+.result-head{{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:14px}}
+.result-head h2{{margin:0;font-size:24px}}
+.badge{{
+  display:inline-block;margin-top:7px;padding:5px 10px;background:var(--soft);
+  color:var(--main);border-radius:999px;font-size:13px;font-weight:800
+}}
+.note{{
+  display:none;margin:0 0 14px;padding:11px 14px;background:#fff8e8;border:1px solid #f0d99b;
+  border-radius:12px;color:#6b5315;line-height:1.6;font-size:14px
+}}
+.qa{{
+  background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin:12px 0;
+  box-shadow:0 4px 14px rgba(15,23,42,.04)
+}}
+.q{{font-weight:900;line-height:1.65;margin-bottom:10px}}
+.a{{
+  background:#f8fafc;border-left:4px solid var(--main);border-radius:8px;
+  padding:12px 14px;line-height:1.75;font-size:17px;white-space:pre-line
+}}
+footer{{text-align:center;color:#94a3b8;font-size:12px;margin-top:24px;line-height:1.7}}
+@media print{{
+  body{{background:#fff}} header p,.panel,footer{{display:none!important}}
+  .wrap{{max-width:none;padding:0}} #result{{display:block!important;margin-top:0}}
+  .qa{{box-shadow:none;break-inside:avoid}}
+}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1>數據導航｜探索未來</h1>
-    <p>輸入座號並選擇學習單，即可查看該座號固定對應的作答內容。</p>
-  </header>
+<header>
+  <h1>數據導航｜探索未來</h1>
+  <p>輸入完整班級座號並選擇學習單，即可查看固定對應的作答內容。</p>
+</header>
 
-  <section class="panel">
-    <div class="form-grid">
-      <div>
-        <label class="title" for="seat">座號</label>
-        <input id="seat" type="number" inputmode="numeric" min="1" max="32" placeholder="例如：12">
-        <div class="seat-hint">有效座號：1～15、20～32</div>
-      </div>
-
-      <div>
-        <span class="title">選擇學習單單元</span>
-        <div class="units">
-          <div class="unit">
-            <input type="radio" name="unit" id="u1" value="unit1">
-            <label for="u1">探索未來 1<small>台灣的補習文化</small></label>
-          </div>
-          <div class="unit">
-            <input type="radio" name="unit" id="u2" value="unit2">
-            <label for="u2">探索未來 2<small>各國的補習文化</small></label>
-          </div>
-          <div class="unit">
-            <input type="radio" name="unit" id="u4" value="unit4">
-            <label for="u4">探索未來 4<small>我想上什麼課？</small></label>
-          </div>
-          <div class="unit">
-            <input type="radio" name="unit" id="u5" value="unit5">
-            <label for="u5">探索未來 5<small>我未來要做什麼？</small></label>
-          </div>
-        </div>
-      </div>
+<section class="panel">
+<div class="form-grid">
+  <div>
+    <label class="title" for="seat">班級座號</label>
+    <input id="seat" type="text" inputmode="numeric" maxlength="5" placeholder="例如：81501" autocomplete="off">
+    <div class="seat-hint">
+      815班：81501～81515、81520～81532<br>
+      816班：81601～81614、81620～81632
     </div>
-
-    <div class="actions">
-      <button class="primary" id="showBtn" type="button">顯示答案</button>
-      <button class="secondary" id="clearBtn" type="button">重新輸入</button>
+  </div>
+  <div>
+    <span class="title">選擇學習單單元</span>
+    <div class="units">
+      <div class="unit"><input type="radio" name="unit" id="u1" value="unit1"><label for="u1">探索未來 1<small>台灣的補習文化</small></label></div>
+      <div class="unit"><input type="radio" name="unit" id="u2" value="unit2"><label for="u2">探索未來 2<small>各國的補習文化</small></label></div>
+      <div class="unit"><input type="radio" name="unit" id="u4" value="unit4"><label for="u4">探索未來 4<small>我想上什麼課？</small></label></div>
+      <div class="unit"><input type="radio" name="unit" id="u5" value="unit5"><label for="u5">探索未來 5<small>我未來要做什麼？</small></label></div>
     </div>
-    <div id="message" role="alert" aria-live="polite"></div>
-  </section>
+  </div>
+</div>
+<div class="actions">
+  <button class="primary" id="showBtn" type="button">顯示答案</button>
+  <button class="secondary" id="clearBtn" type="button">重新輸入</button>
+</div>
+<div id="message" role="alert" aria-live="polite"></div>
+</section>
 
-  <section id="result">
-    <div class="result-head">
-      <div>
-        <h2 id="resultTitle"></h2>
-        <div class="badge" id="seatBadge"></div>
-      </div>
-      <button class="secondary" id="printBtn" type="button">列印／存成 PDF</button>
-    </div>
-    <div class="note" id="unitNote"></div>
-    <div id="qaList"></div>
-  </section>
+<section id="result">
+<div class="result-head">
+  <div><h2 id="resultTitle"></h2><div class="badge" id="seatBadge"></div></div>
+  <button class="secondary" id="printBtn" type="button">列印／存成 PDF</button>
+</div>
+<div class="note" id="unitNote"></div>
+<div id="qaList"></div>
+</section>
 
-  <footer>
-    同一座號每次查詢皆會取得相同答案。<br>
-    探索未來3暫未納入本版本。
-  </footer>
+<footer>
+  同一班級座號每次查詢皆會取得相同答案。<br>
+  探索未來3暫未納入本版本。
+</footer>
 </div>
 
 <script>
 "use strict";
+const validSeats = {seat_js};
 
-// 書寫能力漸進：探索1 → 探索2 → 探索4 → 探索5
-const validSeats = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,21,22,23,24,25,26,27,28,29,30,31,32];
-
-function decodeBase64Utf8(base64) {
+function decodeBase64Utf8(base64) {{
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
+  for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
   return new TextDecoder("utf-8").decode(bytes);
-}
+}}
+const data = JSON.parse(decodeBase64Utf8("{data_b64}"));
 
-const data = JSON.parse(decodeBase64Utf8("eyJ1bml0MSI6eyJ0aXRsZSI6IuaOoue0ouacquS+hiAx772c5Y+w54Gj55qE6KOc57+S5paH5YyWIiwicXVlc3Rpb25zIjpbIlEx77ya5q2k5oqY57ea5ZyW55qE6LW35aeL5pmC6ZaT6IiH57WQ5p2f5pmC6ZaT5YiG5Yil5piv77yfIiwiUTLvvJrmoLnmk5rmipjnt5rlnJbvvIzlj7DngaPoo5znv5Lnj63nmoTmlbjph4/mnInkvZXororljJbvvJ8iLCJRM++8muatpOiuiuWMluS4re+8jOWTquS4gOmhnueahOijnOe/kuePreiuiuWMluacgOWkmu+8nyIsIlE077ya5bCP5a2455Sf5LiK5ZyL5Lit5b6M77yM6KOc57+S5q+U5L6L5Y+K5qCh5aSW5a2457+S5pSv5Ye65aaC5L2V6K6K5YyW77yfIiwiUTXvvJrmoLnmk5rlvbHniYflhaflrrnvvIzoo5znv5LnmoTnm67nmoTmmK/ku4DpurzvvJ8iLCJRNu+8mumZpOS6huW9seeJh+WFp+WuueWklu+8jOS9oOiHquW3seijnOe/kuaIluS4jeijnOe/kueahOWOn+WboOaYr+S7gOm6vO+8nyJdLCJhbnN3ZXJzIjpbWyIyMDA35bm05YiwMjAyMeW5tOOAgiIsIuW+njIwMDflubTliLAyMDIx5bm044CCIiwi6LW36bueMjAwN+W5tO+8jOe1gum7njIwMjHlubTjgIIiLCLmmK8yMDA35bm06IezMjAyMeW5tOOAgiIsIjIwMDflubTplovlp4vvvIwyMDIx5bm057WQ5p2f44CCIiwi6ZaL5aeL5pivMjAwN+W5tO+8jOe1kOadn+aYrzIwMjHlubTjgIIiLCLlnJbooajlvp4yMDA35bm055Wr5YiwMjAyMeW5tOOAgiIsIuacgOaXqTIwMDflubTvvIzmnIDlvowyMDIx5bm044CCIiwi6LW35aeL5bm05Lu95pivMjAwN+W5tOOAgiIsIue1kOadn+W5tOS7veaYrzIwMjHlubTjgIIiLCIyMDA36ZaL5aeL77yM5YiwMjAyMee1kOadn+OAgiIsIuW+nuilv+WFgzIwMDflubTnnIvliLAyMDIx5bm044CCIiwi6YCZ5by15ZyW57Wx6KiIMjAwN+WIsDIwMjHlubTjgIIiLCLmmYLplpPnr4TlnI3mmK8yMDA3772eMjAyMeW5tOOAgiIsIuWcluS4reW+njIwMDflubTntbHoqIjliLAyMDIx5bm044CCIiwi5piv5b6eMjAwN+W5tOmWi+Wni+iomOmMhOeahOOAgiIsIuS4gOebtOWIsDIwMjHlubTngrrmraLjgIIiLCLliY3pnaLmmK8yMDA35bm077yM5b6M6Z2i5pivMjAyMeW5tOOAgiIsIjIwMDflubTmmK/otbfpu57vvIwyMDIx5bm05piv57WC6bue44CCIiwi6LOH5paZ6ZaL5aeL5pa8MjAwN+W5tOOAgiIsIuizh+aWmeacgOW+jOWIsDIwMjHlubTjgIIiLCLlpKfntITmmK8yMDA35YiwMjAyMemAmeauteaZgumWk+OAgiIsIuWcluihqOa2teiTizIwMDflubToh7MyMDIx5bm044CCIiwi5b6eMjAwN+W5tOS4gOi3r+WIsDIwMjHlubTjgIIiLCLmnIDplovlp4vngroyMDA35bm077yM5pyA5b6M54K6MjAyMeW5tOOAgiIsIui1t+WnizIwMDfvvIzntZDmnZ8yMDIx44CCIiwiMjAwN+W5tOi1t++8jOe1seioiOWIsDIwMjHlubTjgIIiLCLpgJnmrrXos4fmlpnmmK8yMDA3772eMjAyMeW5tOOAgiJdLFsi5pW06auU5pW46YeP5rKS5pyJ5aSq5aSn55qE6K6K5YyW44CCIiwi6KOc57+S54+t5pW46YeP5aSn6Ie057at5oyB56mp5a6a44CCIiwi5pW06auU57SE5Zyo5LiA6JCs5aSa6ZaT5LiK5LiL6K6K5YuV44CCIiwi5pW46YeP5pyJ5Y2H5pyJ6ZmN77yM5L2G5beu6Led5LiN5aSn44CCIiwi6KOc57+S54+t57i95pW45rKS5pyJ5piO6aGv5aKe5Yqg44CCIiwi5pW06auU55yL6LW35L6G6K6K5YyW5LiN566X5aSn44CCIiwi5pW46YeP5Zyo5LiA5a6a56+E5ZyN5YWn5LiK5LiL6K6K5YyW44CCIiwi5aSn6Ie057at5oyB5Zyo5LiA6JCs5YWt5Yiw5LiA6JCs5YWr5Y2D6ZaT44CCIiwi6KOc57+S54+t57i95pW4566X5piv55u45bCN56mp5a6a44CCIiwi5pyJ5Lqb5bm05Lu95aKe5Yqg77yM5pyJ5Lqb5bm05Lu95rib5bCR44CCIiwi5pW06auU5rKS5pyJ5LiA55u05aKe5Yqg5oiW5LiA55u05rib5bCR44CCIiwi6KOc57+S54+t5pW46YeP5ZGI54++5LiK5LiL5rOi5YuV44CCIiwi5pW46YeP6ZuW5pyJ5pS56K6K77yM5L2G5pW06auU5b6I5o6l6L+R44CCIiwi5YmN5b6M55qE57i95pW45beu55Ww5Lim5rKS5pyJ5b6I5aSn44CCIiwi5pW06auU57at5oyB5Zyo5beu5LiN5aSa55qE5pW46YeP44CCIiwi6KOc57+S54+t5rKS5pyJ5Zug5bCR5a2Q5YyW5aSn6YeP5raI5aSx44CCIiwi5pW46YeP5aSn57SE57at5oyB5Zyo5LiA6JCs5aSa5a6244CCIiwi57i95pW45YWI5pyJ5aKe5Yqg77yM5b6M5L6G6LyD5bmz56mp44CCIiwi5b6M5pyf5aKe5Yqg5bmF5bqm6K6K5b6X5q+U6LyD5bCP44CCIiwi6KOc57+S54+t57i96YeP5rKS5pyJ5aSq5piO6aGv55qE6K6K5YuV44CCIiwi5pW06auU5pyJ5rOi5YuV77yM5L2G6YKE5piv57at5oyB6auY5pW46YeP44CCIiwi5pW46YeP5Lim5rKS5pyJ5piO6aGv5LiA6Lev5LiL6ZmN44CCIiwi6ZuW54S25pyJ5bCR5a2Q5YyW77yM6KOc57+S54+t5LuN5b6I5aSa44CCIiwi5pW06auU5L6G55yL6KOc57+S54+t5pW46YeP5beu5LiN5aSa44CCIiwi5ZCE5bm05pyJ5aKe5rib77yM5L2G57i96auU566X56mp5a6a44CCIiwi6KOc57+S54+t5LiA55u057at5oyB5LiA6JCs5aSa6ZaT44CCIiwi57i95pW46K6K5YuV5LiN5aSn77yM5L2G56iu6aGe5pyJ5pS56K6K44CCIiwi55yL5ZyW5Y+v55m854++57i95pW45aSn6Ie05L+d5oyB56mp5a6a44CCIl0sWyLmlofnkIbpoZ7oo5znv5Lnj63ororljJbmnIDlpJrjgIIiLCLmmK/mlofnkIbpoZ7oo5znv5Lnj63jgIIiLCLmlofnkIbpoZ7lop7liqDlvpfmnIDmmI7poa/jgIIiLCLmlofnkIboo5znv5Lnj63nmoTmlLnorormnIDlpKfjgIIiLCLmiJHoqo3ngrrmmK/mlofnkIbpoZ7jgIIiLCLlop7liqDmnIDlpJrnmoTmmK/mlofnkIboo5znv5Lnj63jgIIiLCLmlofnkIbpoZ7nmoTmlbjph4/ororljJbmnIDlpKfjgIIiLCLlrbjnp5Hnm7jpl5znmoTmlofnkIboo5znv5Lnj63jgIIiLCLmlofnkIbpoZ7oo5znv5Lnj63lop7liqDlvojlpJrjgIIiLCLororljJbmnIDmmI7poa/nmoTmmK/mlofnkIbpoZ7jgIIiLCLmlofnkIbpoZ7nmoTmiJDplbfmnIDlpJrjgIIiLCLmmK/ku6XoqrLmpa3ngrrkuLvnmoTmlofnkIbpoZ7jgIIiLCLmlofnkIboo5znv5Lnj63lop7liqDnmoTlrrbmlbjmnIDlpJrjgIIiLCLlvp7lnJbkuIrnnIvmmK/mlofnkIbpoZ7mnIDlpJrjgIIiLCLmlofnkIbpoZ7nmoTkuIrljYfmnIDmmI7poa/jgIIiLCLmlofnkIbpoZ7oo5znv5Lnj63miJDplbfluYXluqbmnIDlpKfjgIIiLCLmnIDmmI7poa/nmoTlsLHmmK/mlofnkIboo5znv5Lnj63jgIIiLCLmlofnkIbpoZ7mr5Tlhbbku5bpoZ7liKXororljJbmm7TlpKfjgIIiLCLkuLvopoHmlLnororkvoboh6rmlofnkIboo5znv5Lnj63jgIIiLCLmlofnkIboo5znv5Lnj63nmoTmlbjph4/lop7liqDmnIDlpJrjgIIiLCLlrbjnp5HlnovnmoTmlofnkIboo5znv5Lnj63mnIDlpJrjgIIiLCLmlofnkIbpoZ7nmoTlop7liqDluYXluqbmnIDlpKfjgIIiLCLmiJHnnIvliLDmlofnkIbpoZ7mlLnorormnIDlpJrjgIIiLCLmmK/ljYflrbjnlKjnmoTmlofnkIboo5znv5Lnj63jgIIiLCLmlofnkIbpoZ7oo5znv5Lnj63mmI7poa/lop7liqDjgIIiLCLmlofnkIbpoZ7mmK/ororli5XmnIDlpKfnmoTpoZ7liKXjgIIiLCLnm7jovIPkuYvkuIvmlofnkIbpoZ7lop7liqDmnIDlpJrjgIIiLCLnrZTmoYjmmK/mlofnkIbpoZ7oo5znv5Lnj63jgIIiXSxbIuijnOe/kuavlOS+i+S4i+mZje+8jOS9huiKseiyu+WinuWKoOOAgiIsIuijnOe/kueahOS6uuiuiuWwke+8jOaUr+WHuuWNu+iuiuWkmuOAgiIsIuavlOS+i+mZjeS9ju+8jOS9huagoeWkluWtuOe/kuabtOiKsemMouOAgiIsIuijnOe/kuavlOS+i+a4m+Wwke+8jOiKseiyu+WPjeiAjOWinuWKoOOAgiIsIuS4iuWci+S4reW+jO+8jOavlOS+i+S4i+mZjeOAgeaUr+WHuuS4iuWNh+OAgiIsIuijnOe/kuS6uuaVuOavlOS+i+WwkeS6hu+8jOmMouiKseabtOWkmuOAgiIsIuijnOe/kuavlOS+i+iuiuS9ju+8jOS9huiyu+eUqOaPkOmrmOOAgiIsIuS6uuaVuOavlOS+i+S4i+mZje+8jOWtuOe/kuaUr+WHuuWinuWKoOOAgiIsIuijnOe/kueahOavlOS+i+mZjeS6hu+8jOS9huaUr+WHuuS4iuWNh+OAgiIsIuavlOS+i+mblueEtuS4i+mZje+8jOiyu+eUqOWNu+WinuWKoOOAgiIsIuS4iuWci+S4reW+jOijnOe/kuavlOS+i+iuiuWwkeOAgiIsIuS9huagoeWkluWtuOe/kueahOiKseiyu+iuiumrmOOAgiIsIuijnOe/kuavlOS+i+mZjeS9ju+8jOW5s+Wdh+aUr+WHuuaPkOmrmOOAgiIsIuS6uuiuiuWwkeS4gOm7nu+8jOS9huavj+S6uuiKseabtOWkmumMouOAgiIsIuijnOe/kuavlOS+i+WwkeS6hu+8jOaUr+WHuuWPjeiAjOWinuWKoOOAgiIsIuWci+S4reijnOe/kuavlOS+i+i8g+S9ju+8jOiyu+eUqOi8g+mrmOOAgiIsIuWPg+WKoOavlOS+i+S4i+mZje+8jOiKseiyu+WNu+S4iuWNh+OAgiIsIuijnOe/kueahOS6uui8g+Wwke+8jOS9huiKseeahOmMoui8g+WkmuOAgiIsIuavlOS+i+W+gOS4i++8jOagoeWkluWtuOe/kuaUr+WHuuW+gOS4iuOAgiIsIuijnOe/kueOh+mZjeS9ju+8jOS9huWtuOe/kuiyu+eUqOWinuWKoOOAgiIsIuS4iuWci+S4reW+jOiKseWcqOijnOe/kueahOmMouiuiuWkmuOAgiIsIuavlOS+i+S4jeaYr+iuiumrmO+8jOS9huiKseiyu+WinuWKoOOAgiIsIumblueEtuijnOe/kuavlOS+i+S4i+mZje+8jOaUr+WHuuS7jeWinuWKoOOAgiIsIuWPg+WKoOeahOS6uui8g+Wwke+8jOW5s+Wdh+iKseiyu+iuiumrmOOAgiIsIuijnOe/kueOh+S4i+mZje+8jOagoeWkluaUr+WHuuWinuWKoOOAgiIsIuS6uuaVuOavlOS+i+mZjeS9ju+8jOS9huWutuW6reiKseabtOWkmumMouOAgiIsIuijnOe/kuavlOS+i+a4m+Wwke+8jOaUr+WHuuWNu+aykuaciea4m+WwkeOAgiIsIuaVtOmrlOaYr+avlOS+i+S4i+mZjeOAgeaUr+WHuuWinuWKoOOAgiJdLFsi54K65LqG6K6T6Ieq5bex55qE5oiQ57i+6K6K5aW944CCIiwi5oqK5a245qCh5LiN5pyD55qE5YWn5a655a245pyD44CCIiwi5oOz5Yqg5by35q+U6LyD5LiN5aW955qE56eR55uu44CCIiwi5biM5pyb6Kqy5qWt5LiN6KaB6JC95b6M5Yil5Lq644CCIiwi5Y+v5Lul6KOc6Laz6Ieq5bex5LiN5pyD55qE5Zyw5pa544CCIiwi54K65LqG5rqW5YKZ6ICD6Kmm5ZKM5Y2H5a2444CCIiwi5oOz6K6T6Ieq5bex55qE5a2457+S6IO95Yqb5pu05aW944CCIiwi5Yqg5by35a245qCh5LiK6Kqy5rKS5a245pyD55qE5YWn5a6544CCIiwi5biM5pyb6ICD6Kmm5Y+v5Lul6ICD5b6X5pu05aW944CCIiwi54K65LqG6Lef5LiK5a245qCh55qE5a2457+S6YCy5bqm44CCIiwi6K6T5Y6f5pys5pyD55qE56eR55uu6K6K5b6X5pu05by344CCIiwi5piv5LiA56iu5Yqg5by36Kqy5qWt55qE5pa55rOV44CCIiwi5LiN5oOz6K6T6Ieq5bex55qE5oiQ57i+6JC95b6M44CCIiwi5Y+v5Lul6KOc5pWR5a2457+S5LiN6Laz55qE5Zyw5pa544CCIiwi54K65LqG5aKe5Yqg6Ieq5bex55qE56u254it5Yqb44CCIiwi5a626ZW35biM5pyb5a2p5a2Q5pyJ5pu05aW955qE5oiQ57i+44CCIiwi5oqK5q+U6LyD5byx55qE56eR55uu6KOc6LW35L6G44CCIiwi5o+Q5YmN5a2457+S5a245qCh6YKE5rKS5pWZ55qE5YWn5a6544CCIiwi5pyJ5Lqb5Lq65piv54K65LqG5L+d5oyB5aW95oiQ57i+44CCIiwi5Y+v5Lul5b6X5Yiw5a245qCh5aSW55qE5a2457+S5bmr5Yqp44CCIiwi54K65LqG5Zyo6ICD6Kmm5Lit5pyJ5pu05aW955qE6KGo54++44CCIiwi5a245LiN5pyD5pmC5Y+v5Lul5pyJ5Lq65YaN5pWZ5LiA5qyh44CCIiwi6K6T6Ieq5bex5pu05a655piT6Lef5LiK6Kqy56iL44CCIiwi5pyJ5Lqb5Lq66KOc57+S5piv54K65LqG5Y2H5a2456u254it44CCIiwi5biM5pyb6Ieq5bex55qE6Kqy5qWt6IO95Yqb6YCy5q2l44CCIiwi5LiN5Y+q6KOc5byx56eR77yM5Lmf5Y+v6IO95Yqg5by35by356eR44CCIiwi6K6T6Ieq5bex5Zyo5a2457+S5LiK5pu05pyJ5YSq5Yui44CCIiwi6KOc6Laz5LiN6Laz77yM5Lmf6K6T5aW955qE5Zyw5pa55pu05aW944CCIl0sWyLmiJHmlbjlrbjmr5TovIPlvLHvvIzmiYDku6XmnInljrvoo5znv5LjgIIiLCLniLbmr43luIzmnJvmiJHmiJDnuL7mm7Tlpb3vvIzmiYDku6Xoo5znv5LjgIIiLCLmiJHmgJXot5/kuI3kuIrpgLLluqbvvIzmiY3ljrvoo5znv5LjgIIiLCLmnInkuI3mh4LnmoTpoYznm67lj6/ku6XllY/oo5znv5Lnj63ogIHluKvjgIIiLCLmiJHmg7PorpPogIPoqabmiJDnuL7lho3pgLLmraXkuIDpu57jgIIiLCLlkIzlrbjpg73mnInoo5zvvIzmiJHkuZ/mg7PkuIDotbfljrvjgIIiLCLmiJHoi7Hmlofmr5TovIPkuI3lpb3vvIzmiYDku6XljrvliqDlvLfjgIIiLCLkuIroqrLmnInkupvogb3kuI3mh4LvvIzmg7Plho3lrbjkuIDmrKHjgIIiLCLmiJHmg7Pmj5DliY3lrbjvvIzlrbjmoKHkuIroqrLmnIPmr5TovIPovJXprIbjgIIiLCLlrrbkurroprrlvpfoo5znv5LlsI3ljYflrbjmnInluavliqnjgIIiLCLmiJHpnIDopoHmnInkurrnnaPkv4PmiJHlr6vlip/oqrLjgIIiLCLlnKjlrrblrrnmmJPnjqnmiYvmqZ/vvIzmiYDku6Xljrvoo5znv5LjgIIiLCLmiJHluIzmnJvmrrXogIPlj6/ku6XogIPlvpfmm7Tlpb3jgIIiLCLmiJHoh6rlt7Hmg7PmiorlvLHnmoTnp5Hnm67oo5zotbfkvobjgIIiLCLmiJHmspLmnInoo5znv5LvvIzlm6Dngrroh6rlt7HoroDlsLHlj6/ku6XjgIIiLCLmiJHoprrlvpflrbjmoKHkuIroqrLlt7LntpPotrPlpKDkuobjgIIiLCLmiJHkuI3mg7Pmr4/lpKnmlL7lrbjlvozpgoTkuIDnm7TkuIroqrLjgIIiLCLmiJHmg7PnlZnmmYLplpPlgZroh6rlt7HllpzmraHnmoTkuovmg4XjgIIiLCLoo5znv5LosrvlpKrpq5jvvIzmiYDku6XmspLmnInlj4PliqDjgIIiLCLmiJHmr5TovIPllpzmraHoh6rlt7HlronmjpLoroDmm7jpgLLluqbjgIIiLCLkuI3mnIPnmoTpoYznm67miJHmnIPnm7TmjqXllY/ogIHluKvjgIIiLCLmiJHoprrlvpfoo5znv5LkuI3kuIDlrprpganlkIjmr4/lgIvkurrjgIIiLCLmiJHmg7PlhYjpnaDoh6rlt7HoroDnnIvnnIvjgIIiLCLlm57lrrbopIfnv5LlsI3miJHkvoboqqrlsLHlpKDkuobjgIIiLCLmiJHmspLmnInnibnliKXpnIDopoHliqDlvLfnmoTnp5Hnm67jgIIiLCLmiJHmg7PmiormmYLplpPnlZnntabpgYvli5XlkozkvJHmga/jgIIiLCLmiJHoo5znv5LmmK/lm6DngrrlrrbplbfluavmiJHlronmjpLnmoTjgIIiLCLmiJHmnIPnnIvoh6rlt7HnmoTpnIDopoHlho3msbrlrpropoHkuI3opoHoo5zjgIIiXV19LCJ1bml0MiI6eyJ0aXRsZSI6IuaOoue0ouacquS+hiAy772c5ZCE5ZyL55qE6KOc57+S5paH5YyWIiwicXVlc3Rpb25zIjpbIlEx77ya5LuA6bq85piv44CM5b2M6KOc5YSq5Yui44CN77yfIiwiUTLvvJrmoLnmk5rmlofnq6DlhaflrrnvvIzmraTmlofnq6DmmK/lkKbmnInliIbmnpDlrbjnp5Hog73lipvpq5jkvY7oiIfoo5znv5LnmoTpl5zoga/mgKfvvJ/oq4vmj5Dlh7rnm7jpl5zkvp3mk5rjgIIiLCJRM++8muOAjOS4jeaYr+WPquacieadseS6nueahOWci+WutuaEm+ijnOe/kuOAje+8jOiri+aJvuWHuuaWh+eroOS4reaUr+aMgeatpOirlum7nueahOebuOmXnOaVuOaTmuOAgiIsIlE077ya5paH56ug5Lit55qE6KOc57+S5YiG54K65ZOqMueorumhnuWei++8nyIsIlE177ya5Y+w54Gj5LuY6LK76KOc57+S55qE5q+U5L6L5rKS5pyJ6aCQ5pyf5Lit55qE6auY77yM5Li76KaB55qE5Y6f5Zug54K65L2V77yfIiwiUTbvvJroi6XopoHorYnmmI7mlofnq6DkuK3nmoTjgIzlvYzoo5zlhKrli6LjgI3lrZjlnKjvvIzlk6rkuIDnqK7poZ7lnovnmoTlranlrZDlj4PliqDoo5znv5LnmoTmr5TkvovopoHmr5TovIPpq5jvvJ/vvIjlrrbluq3npL7ntpPog4zmma/pq5jkvY7jgIHop6PmsbrllY/poYzog73lipvpq5jkvY7vvIkiXSwiYW5zd2VycyI6W1si6auY56S+57aT5a625bqt6IO955So6LOH5rqQ5rib5bCR5a2p5a2Q5a2457+S6JC95b6M44CCIiwi5a625aKD6LyD5aW955qE5a2p5a2Q6YGH5Yiw5oyr5oqY5pmC6LyD6IO9542y5b6X6KOc5pWR44CCIiwi5a625bqt6LOH5rqQ5aSa77yM5Y+v6ZmN5L2O5a2457+S5LiN5Yip5bi25L6G55qE5b2x6Z+/44CCIiwi5YSq5Yui5a625bqt6IO96YCP6YGO6KOc57+S5Y2U5Yqp5a2p5a2Q6L+95LiK6YCy5bqm44CCIiwi5a625aKD5aW95pmC77yM54i25q+N6LyD5pyJ6IO95Yqb6KOc5pWR5a2p5a2Q55qE5byx6aCF44CCIiwi6auY56S+57aT5a625bqt5Y+v5oqV5YWl6LOH5rqQ5b2M6KOc5a2p5a2Q55qE5LiN6Laz44CCIiwi5a2p5a2Q6KGo54++5L2O6JC95pmC77yM5YSq5Yui5a625bqt6LyD6IO95o+Q5L6b5Y2U5Yqp44CCIiwi54i25q+N55So5a625pWZ5oiW6KOc57+S5rib5bCR5a2p5a2Q6JC95b6M55qE5oOF5rOB44CCIiwi5a625bqt5qKd5Lu26LyD5L2z77yM6IO95bmr5a2p5a2Q5YWL5pyN5a2457+S5oyr5oqY44CCIiwi5pyJ6LOH5rqQ55qE5a625bqt6LyD6IO95oy95pWR5a2p5a2Q55qE5a2457+S5byx5Yui44CCIiwi5a625bqt5YSq5Yui5Y+v6K6T6LKg6Z2i5b2x6Z+/6Zqo5oiQ6ZW36YCQ5ry45rib5byx44CCIiwi5a625aKD5L2z55qE5a2455Sf5Y2z5L2/6JC95b6M77yM5Lmf6LyD5pyJ5qmf5pyD6KOc5pWR44CCIiwi6auY56S+57aT54i25q+N6IO96Iqx6Yyi6KOc5by35a2p5a2Q6LyD5byx55qE6YOo5YiG44CCIiwi5a625bqt6IOM5pmv6LyD5aW977yM5Y+v5o+Q5L6b5pu05aSa6KOc5pWR5a2457+S6LOH5rqQ44CCIiwi5pyJ6LOH5rqQ55qE54i25q+N6IO96ZmN5L2O5a2p5a2Q6Kqy5qWt6JC95b6M55qE5b2x6Z+/44CCIiwi5YSq5Yui5a625bqt5pyD55So6aGN5aSW6LOH5rqQ5bmr5a2p5a2Q6KOc5Zue5beu6Led44CCIiwi5a2p5a2Q6YGH5Yiw5a2457+S5ZWP6aGM5pmC77yM5a625aKD5aW96LyD6IO96JmV55CG44CCIiwi56S+57aT5qKd5Lu25aW977yM6LyD6IO95o+Q5L6b5a625pWZ5oiW6Kqy5b6M6KOc57+S44CCIiwi5a625bqt6LOH5rqQ6IO95b2M6KOc5a2p5a2Q5pep5pyf5a2457+S5LiK55qE5LiN5Yip44CCIiwi5a625aKD5YSq5Yui5L2/5a2p5a2Q6LyD5LiN5pyD5Zug5oyr5oqY5oyB57qM6JC95b6M44CCIiwi54i25q+N6LOH5rqQ5YWF6Laz5pmC77yM6IO95Y2U5Yqp5a2p5a2Q5pS55ZaE5byx6aCF44CCIiwi6auY56S+57aT5a625bqt6IO955So5pWZ6IKy6LOH5rqQ5rib5bCR5LiN5Yip5b2x6Z+/44CCIiwi5a625aKD5aW955qE5a2p5a2Q6LyD5pyJ5qmf5pyD542y5b6X6aGN5aSW5a2457+S5Y2U5Yqp44CCIiwi5a625bqt5qKd5Lu25L2z77yM5Y+v55So6KOc57+S6KOc5pWR6LyD5beu55qE6KGo54++44CCIiwi6LOH5rqQ6LyD5aSa55qE5a625bqt6IO95bmr5a2p5a2Q6ZmN5L2O6JC95b6M6aKo6Zqq44CCIiwi5YSq5Yui5a625bqt6LyD6IO95Zyo5a2p5a2Q6JC95b6M5pmC5o+Q5L6b6KOc5pWR44CCIiwi6auY56S+57aT5a625bqt5Y+v5oqV5YWl5pu05aSa6LOH5rqQ57at5oyB5a2p5a2Q55m85bGV44CCIiwi5a625bqt6LOH5rqQ6LyD5YWF6Laz77yM6LyD6IO96KOc5Zue5a2457+S5LiK55qE5beu6Led44CCIl0sWyLmnInvvIzku6VQSVNB6Kej5rG65ZWP6aGM6IO95Yqb5q+U6LyD6KOc57+S5oOF5b2i44CCIiwi5pyJ77yM56CU56m25q+U6LyD6auY5L2O6Kej5rG65ZWP6aGM6IO95Yqb6IiH6KOc57+S546H44CCIiwi5pyJ77yM5L2G5oyH5qiZ5piv6Kej5rG65ZWP6aGM6IO95Yqb77yM5LiN5piv5a2456eR5oiQ57i+44CCIiwi5pyJ77yM6IO95Yqb6LyD5L2O6ICF5Zyo5aSa5ZyL5pu05bi45Y+D5Yqg5LuY6LK76KOc57+S44CCIiwi5pyJ77yM5paH56ug55SoUElTQeiDveWKm+izh+aWmeWIhuaekOijnOe/kuapn+eOh+OAgiIsIuacie+8jOWkmuaVuOWci+WutuS9juiDveWKm+WtuOeUn+i8g+W4uOS7mOiyu+ijnOe/kuOAgiIsIuacie+8jOWNl+mfk+WJh+WHuuePvuiDveWKm+i2iumrmOi2iuW4uOS7mOiyu+ijnOe/kuOAgiIsIuacie+8jOWFjeiyu+ijnOe/kuS5n+avlOi8g+S6huS4jeWQjOiDveWKm+WtuOeUn+OAgiIsIuacie+8jOeglOeptuaKiuiDveWKm+mrmOS9juiIh+ijnOe/kuWei+aFi+S4gOi1t+WIhuaekOOAgiIsIuacie+8jOS9juiDveWKm+iAheWcqOioseWkmuWci+WutuabtOWPr+iDveWOu+ijnOe/kuOAgiIsIuacie+8jFBJU0Hmj5Dkvpvop6PmsbrllY/poYzog73lipvkvZzngrrmr5TovIPmjIfmqJnjgIIiLCLmnInvvIzlkITlnIvog73lipvpq5jkvY7oiIfoo5znv5Lpl5zkv4LkuKbkuI3nm7jlkIzjgIIiLCLmnInvvIzmlofnq6DliIbmnpDog73lipvjgIHnpL7ntpPog4zmma/oiIfoo5znv5Lpl5zkv4LjgIIiLCLmnInvvIzlpJrlnIvlkYjnj77og73lipvotorkvY7jgIHoo5znv5LmqZ/njofotorpq5jjgIIiLCLmnInvvIzlj7DngaPpq5jnpL7ntpPlrrbluq3nlJroh7Pog73lipvotorpq5jotorluLjoo5zjgIIiLCLmnInvvIznoJTnqbbku6XlibXpgKDmgKfop6PmsbrllY/poYzog73lipvlgZrljYDliIbjgIIiLCLmnInvvIzog73lipvkvY7ogIXluLjopovovIPpq5jnmoTku5josrvoo5znv5LmqZ/njofjgIIiLCLmnInvvIzml6XmnKznrYnlnIvlhY3osrvoo5znv5LlkYjnj77nm7jlj43ntZDmnpzjgIIiLCLmnInvvIznoJTnqbbmr5TovIPpq5jkvY7og73lipvlrbjnlJ/nmoToo5znv5Llt67nlbDjgIIiLCLmnInvvIzog73lipvmmK/ot6jlnIvoo5znv5LmqKHlnovnmoTph43opoHororpoIXjgIIiLCLmnInvvIzkvYbmlofnq6DlvLfoqr/mraTog73lipvkuI3nrYnmlrzlrbjnp5Hog73lipvjgIIiLCLmnInvvIzku5josrvoiIflhY3osrvoo5znv5Lpg73liIbmnpDkuobog73lipvlt67nlbDjgIIiLCLmnInvvIzkvY7op6Pmsbrog73lipvogIXlnKjlpJrmlbjlnIvlrrbovIPluLjoo5znv5LjgIIiLCLmnInvvIzljZfpn5Pku5josrvoo5znv5LnmoTntZDmnpzlkozlpJrmlbjlnIvlrrbkuI3lkIzjgIIiLCLmnInvvIzmlofnq6Dnm7TmjqXoqI7oq5bog73lipvoiIfoo5znv5LmqZ/njofnmoTpl5zoga/jgIIiLCLmnInvvIznoJTnqbbnlKjog73lipvliIbntYTop4Dlr5/oqrDmm7TluLjlj4PliqDoo5znv5LjgIIiLCLmnInvvIzkuI3lkIzlnIvlrrblkYjnj77kuI3lkIznmoTog73lipvoo5znv5Lpl5zkv4LjgIIiLCLmnInvvIxQSVNB6LOH5paZ6K6T56CU56m26IO95q+U6LyD6IO95Yqb6IiH6KOc57+S44CCIl0sWyLkv4TnvoXmlq/nrYnlm5vlnLDoo5znv5LnjofpgZQ4MO+8he+9njg177yF44CCIiwi5pel5pys44CB5rOi6Jit6KOc57+S546H5Lmf5o6l6L+RODDvvIXjgIIiLCLkv4TnvoXmlq/oo5znv5LnjofmnIDpq5jvvIzkuKbpnZ7mnbHkup7lnIvlrrbjgIIiLCLms6LomK3mjqXov5E4MO+8he+8jOmhr+ekuuatkOa0suS5n+ebm+ihjOijnOe/kuOAgiIsIuiRoeiQhOeJmeijnOe/kueOh+i2hemBjjYw77yF77yM5Lim6Z2e5p2x5Lqe54m55pyJ44CCIiwi576p5aSn5Yip5pyJ6LaF6YGO5YWt5oiQ5a2455Sf5Y+D5Yqg6Kqy5b6M6KOc57+S44CCIiwi6Iux5ZyL6KOc57+S546H5o6l6L+RNjDvvIXvvIzmr5TkvovkuKbkuI3kvY7jgIIiLCLoiqzomK3nuL3oo5znv5LnjofmjqXov5E2MO+8he+8jOS5n+W+iOaZrumBjeOAgiIsIuWhnueIvue2reS6nuijnOe/kueOh+aOpei/keWFreaIkO+8jOS4pumdnuadseS6nuOAgiIsIuWFqOeQg+mBjuWNiuaVuOWci+WutuS4reWtuOeUn+ijnOe/kueOh+i2hemBjjUw77yF44CCIiwi5L+E576F5pav44CB5Y2X6Z+T562J5YmN5Zub5ZCN55qG6YGUODDvvIXku6XkuIrjgIIiLCLkv4TnvoXmlq/lkI3liJflhajnkIPnuL3oo5znv5LnjofnrKzkuIDjgIIiLCLml6XmnKzoiIfms6LomK3pg73mjqXov5HlhavmiJDlrbjnlJ/lj4PliqDoo5znv5LjgIIiLCLku6XoibLliJfnrYnkupTlnLDnmoToo5znv5Lnjofpg73otoXpgY7lha3miJDjgIIiLCLmrZDmtLLnmoTms6LomK3oo5znv5LnjofmjqXov5E4MO+8heOAgiIsIuiLseWci+OAgeWhnueIvue2reS6nuOAgeiKrOiYremDveaOpei/kTYw77yF44CCIiwiMzblnIvkuK3vvIzotoXpgY7ljYrmlbjlnIvlrrbnmoToo5znv5LnjofpgL41MO+8heOAgiIsIuS/hOe+heaWr+mBlDgw77yF772eODXvvIXvvIzpq5jmlrzoqLHlpJrmnbHkup7lnLDljYDjgIIiLCLms6LomK3mjqXov5HlhavmiJDvvIzmmK/lvojmmI7poa/nmoTmrZDmtLLkvovlrZDjgIIiLCLoiqzomK3pm5bku5josrvlsJHvvIzkvYbnuL3oo5znv5Lnjofku43mjqXov5Hlha3miJDjgIIiLCLkv4TnvoXmlq/oo5znv5LnjoflsYXpppbvvIzmiZPnoLTlj6rmnInmnbHkup7nmoTljbDosaHjgIIiLCLokaHokITniZnjgIHkv53liqDliKnkup7jgIHnvqnlpKfliKnnmobotoXpgY7lha3miJDjgIIiLCLmrZDmtLLlpJrlnIvoo5znv5LnjofpgZTlha3miJDlt6blj7PmiJbmm7Tpq5jjgIIiLCLms6LomK3oo5znv5LnjofmjqXov5E4MO+8he+8jOWPr+aUr+aMgeatpOirlum7nuOAgiIsIuS/hOe+heaWr+aYr+e4veijnOe/kueOh+acgOmrmOeahOWPl+iqv+afpeWci+WutuOAgiIsIuiLseWci+iIh+iKrOiYremDveaOpei/keWFreaIkOWtuOeUn+WPg+WKoOijnOe/kuOAgiIsIuS4jeWPquS6nua0su+8jOS/hOe+heaWr+iIh+azouiYreeahOavlOS+i+S5n+W+iOmrmOOAgiIsIuWFqOeQg+ijnOe/kuW3suaIkOi2qOWLou+8jOmBjuWNiuWPl+iqv+afpeWci+WutumAvuS6lOaIkOOAgiJdLFsi5LuY6LK76KOc57+S6IiH5YWN6LK76KOc57+S44CCIiwi5YiG5oiQ5LuY6LK75Z6L6IiH5YWN6LK75Z6L5YWp56iu44CCIiwi5LiA56iu5pS26LK76KOc57+S77yM5LiA56iu5YWN6LK76KOc57+S44CCIiwi5paH56ug5YiG54K65LuY6LK75Y+K5YWN6LK76KOc57+S44CCIiwi5Y+v5YiG5oiQ6ZyA6KaB5LuY6LK76IiH5LiN6ZyA5LuY6LK75YWp6aGe44CCIiwi5LuY6LK76Kqy5aSW6KOc57+S5ZKM5YWN6LK76Kqy6LyU44CCIiwi56CU56m25Y2A5YiG5pS26LK76KOc57+S6IiH5YWN6LK76KOc57+S44CCIiwi5YWp56iu6aGe5Z6L5piv5LuY6LK744CB5YWN6LK76KOc57+S44CCIiwi5YiG5oiQ5qCh5aSW5LuY6LK76IiH5YWN6LK75Z6L6KOc57+S44CCIiwi5paH56ug5Li76KaB5q+U6LyD5LuY6LK75ZKM5YWN6LK75YWp6aGe44CCIiwi5LuY6Yyi5Y+D5Yqg55qE6KOc57+S5Y+K5YWN6LK76Kqy56iL44CCIiwi5Y+v5YiG54K65pS26LK75Z6L5Y+K5YWN6LK75Z6L44CCIiwi5LiA6aGe6ZyA6KaB57mz6LK777yM5Y+m5LiA6aGe5LiN5pS26LK744CCIiwi5LuY6LK75Z6L6KOc57+S6IiH5YWN6LK75Z6L6Kqy6LyU44CCIiwi56CU56m25bCH6KOc57+S5YiG54K65LuY6LK744CB5YWN6LK744CCIiwi5YiG54K66KaB5LuY6LK76IiH5YWN6LK75Y+D5Yqg5YWp56iu44CCIiwi5LiA56iu5piv5LuY6LK76KOc57+S77yM5LiA56iu5piv5YWN6LK76Kqy6LyU44CCIiwi5paH56ug5q+U6LyD5pS26LK75Y+K5YWN6LK76KOc57+S44CCIiwi5bCx5piv5LuY6LK76KOc57+S5ZKM5YWN6LK76KOc57+S44CCIiwi6KOc57+S5Z6L5oWL5YiG5oiQ5LuY6LK76IiH5YWN6LK744CCIiwi5YiG54K654ef5Yip5LuY6LK76KOc57+S6IiH5YWN6LK76KOc57+S44CCIiwi5YWp6aGe5YiG5Yil54K65LuY6LK75Y+K5YWN6LK744CCIiwi6ZyA6KaB6Iqx6Yyi55qE6KOc57+S6IiH5YWN6LK76KOc57+S44CCIiwi5paH56ug5Lit55qE5YiG6aGe5piv5LuY6LK744CB5YWN6LK744CCIiwi5LuY6LK76Kqy6LyU5ZKM5YWN6LK76Kqy6LyU5YWp56iu6aGe5Z6L44CCIiwi6KOc57+S5YiG5oiQ5pS26LK75ZKM5YWN6LK75YWp56iu44CCIiwi5LiA5piv5LuY6LK76KOc57+S77yM5LqM5piv5YWN6LK76KOc57+S44CCIiwi56CU56m26LOH5paZ5Y2A5YiG5LuY6LK76KOc57+S6IiH5YWN6LK76KOc57+S44CCIl0sWyLnrKzlhavnr4Dpm5bmlLbosrvvvIzkvYZQSVNB5pyq566X5oiQ5LuY6LK76KOc57+S44CCIiwi5Y+w54Gj5qCh5YWn56ys5YWr56+A5pS26LK75L2O77yM5pyq5YiX5YWl5LuY6LK76KOc57+S44CCIiwi5a245qCh6Kqy5b6M6LyU5bCO5pyq5ZyoUElTQeWRiOePvueCuuS7mOiyu+ijnOe/kuOAgiIsIuesrOWFq+evgOS5n+imgeaUtuiyu++8jOWNu+S4jeeul+agoeWkluS7mOiyu+ijnOe/kuOAgiIsIuS4jeWwkeWtuOeUn+WPg+WKoOi8g+S+v+WunOeahOagoeWFp+iqsuW+jOi8lOWwjuOAgiIsIlBJU0Hku5josrvoo5znv5LkuLvopoHmjIfmoKHlpJboo5znv5LoiIflrrbmlZnjgIIiLCLlj7DngaPnrKzlhavnr4DosrvnlKjkvY7vvIzntbHoqIjmmYLmnKrnrpfku5josrvoo5znv5LjgIIiLCLmoKHlhafoqrLovJTliIbmlaPpnIDmsYLvvIzkuZ/mnKrliJflhaXku5josrvoo5znv5LjgIIiLCLnrKzlhavnr4DlsazmoKHlhafoqrLovJTvvIxQSVNB5rKS5pyJ566X6YCy5Y6744CCIiwi6YOo5YiG6KOc57+S6ZyA5rGC55Sx6LyD5L6/5a6c55qE56ys5YWr56+A5ru/6Laz44CCIiwi5Zug56ys5YWr56+A5pyq6KiI5YWl77yM5LuY6LK76KOc57+S5q+U5L6L55yL5L6G6LyD5L2O44CCIiwi5Y+w54Gj5pmu6YGN5pyJ5pS26LK76LyD5bCR55qE5qCh5YWn6Kqy5b6M6LyU5bCO44CCIiwiUElTQeaykuacieaKiuagoeWFp+esrOWFq+evgOimlueCuuS7mOiyu+ijnOe/kuOAgiIsIuWtuOeUn+S4iuesrOWFq+evgO+8jOS9huizh+aWmeS4jeacg+eul+S9nOS7mOiyu+ijnOe/kuOAgiIsIuagoeWFp+iqsuW+jOi8lOWwjumbluaUtuiyu++8jOWNu+S4jeWcqOipsue1seioiOS4reOAgiIsIuWPsOeBo+acieS+v+WunOesrOWFq+evgO+8jOS9v+agoeWkluS7mOiyu+avlOS+i+i8g+S9juOAgiIsIumDqOWIhuWtuOeUn+iqsuW+jOWtuOe/kuaYr+WcqOWtuOagoeesrOWFq+evgOWujOaIkOOAgiIsIuesrOWFq+evgOWDueagvOS9ju+8jOS5n+aykuacieiiq+atuOWFpeS7mOiyu+ijnOe/kuOAgiIsIue1seioiOWPquWQq+agoeWklueHn+WIqeijnOe/kuWPiuWAi+S6uuWutuaVmeOAgiIsIuagoeWFp+iqsui8lOacquioiOWFpe+8jOS9v+S7mOiyu+avlOS+i+S9juaWvOWNsOixoeOAgiIsIuWPsOeBo+esrOWFq+evgOaZrumBje+8jOWNu+eEoeazleWPjeaYoOWcqFBJU0HkuK3jgIIiLCLlm6DngrrmoKHlhafmlLbosrvoqrLovJTmspLmnInliJfngrrku5josrvoo5znv5LjgIIiLCLkuI3lsJHoqrLlvozovJTlsI7lnKjmoKHlhafpgLLooYzvvIzos4fmlpnmnKroqIjlhaXjgIIiLCLnrKzlhavnr4Dmr5Too5znv5Lnj63kvr/lrpzvvIzkuZ/kuI3nrpdQSVNB5LuY6LK744CCIiwi5LuY6LK76KOc57+S57Wx6KiI5pyq5YyF5ZCr5Y+w54Gj5bi46KaL55qE56ys5YWr56+A44CCIiwi5qCh5YWn56ys5YWr56+A5pu/5Luj6YOo5YiG6KOc57+S77yM5LiU5pyq6KKr6KiI5YWl44CCIiwiUElTQeWumue+qeaOkumZpOagoeWFp+WwkemhjeaUtuiyu+eahOiqsuW+jOi8lOWwjuOAgiIsIuS4u+imgeWboOesrOWFq+evgOaUtuiyu+Wwke+8jOe1seioiOWPiOaykuacieeul+WFpeOAgiJdLFsi6auY56S+57aT44CB5L2O6Kej5rG65ZWP6aGM6IO95Yqb55qE5a2455Sf44CCIiwi5a625aKD6LyD5aW95L2G6Kej5rG65ZWP6aGM6IO95Yqb5YGP5L2O55qE5a2p5a2Q44CCIiwi6auY56S+57aT5a625bqt5Lit55qE5L2O6IO95Yqb5a2455Sf44CCIiwi5a625bqt5qKd5Lu25L2z44CB6Kej5rG65ZWP6aGM6IO95Yqb5L2O55qE5a2455Sf44CCIiwi5pyJ6LOH5rqQ5a625bqt5Lit6IO95Yqb6LyD5byx55qE5a2p5a2Q44CCIiwi6auY56S+57aT6IOM5pmv5LiU6IO95Yqb5YGP5L2O55qE5a2455Sf44CCIiwi5a625aKD5aW95L2G6Kej5rG66ZmM55Sf5ZWP6aGM6IO95Yqb6LyD5L2O6ICF44CCIiwi6auY56S+57aT44CB5L2O6IO95Yqb6ICF5oeJ5pu05bi45LuY6LK76KOc57+S44CCIiwi5a625bqt6LOH5rqQ5aSa5L2G6IO95Yqb6LyD5byx55qE5a2455Sf44CCIiwi6auY56S+57aT5a625bqt55qE5L2O6Kej5rG66IO95Yqb5a2p5a2Q44CCIiwi5a625aKD5YSq5Yui44CB5ZWP6aGM6Kej5rG66IO95Yqb5YGP5L2O6ICF44CCIiwi6IO95Yqb6LyD5L2O55qE6auY56S+57aT5a625bqt5a2455Sf44CCIiwi6auY56S+57aT5LiU6ZyA6KaB6KOc5pWR55qE5L2O6IO95Yqb5a2455Sf44CCIiwi5a625bqt6IOM5pmv5aW95L2G6IO95Yqb6JC95b6M55qE5a2p5a2Q44CCIiwi6auY56S+57aT5a625bqt5Lit6KGo54++6LyD5byx55qE5a2455Sf44CCIiwi5a625aKD6LyD5L2z44CB6Kej5rG65ZWP6aGM6IO95Yqb6LyD5beu6ICF44CCIiwi5pyJ5a625bqt6LOH5rqQ5L2G6IO95Yqb5YGP5L2O55qE5a2455Sf44CCIiwi6auY56S+57aT5L2O6IO95Yqb6ICF55qE5LuY6LK76KOc57+S546H5oeJ6LyD6auY44CCIiwi5a625aKD5aW95Y+I6ZyA6KaB5a2457+S6KOc5pWR55qE5a2p5a2Q44CCIiwi5a625bqt5qKd5Lu25YSq5Yui5L2G6Kej5rG66IO95Yqb6LyD5byx6ICF44CCIiwi6auY56S+57aT5a625bqt55qE5L2O6IO95Yqb5a2455Sf5pyA56ym5ZCI44CCIiwi54i25q+N6LOH5rqQ6LyD5aSa55qE5L2O6IO95Yqb5a2455Sf44CCIiwi6auY56S+57aT44CB5L2O5ZWP6aGM6Kej5rG66IO95Yqb6ICF44CCIiwi5a625aKD6LyD5aW95LiU6IO95Yqb5YGP5byx55qE5a2455Sf44CCIiwi5a625bqt6LOH5rqQ5YWF6Laz5L2G6Kej5rG66IO95Yqb5L2O55qE5a2p5a2Q44CCIiwi5YSq5Yui5a625bqt5Lit6IO95Yqb6LyD5beu55qE5a2455Sf44CCIiwi6auY56S+57aT6IOM5pmv44CB5L2O6Kej5rG66IO95Yqb55qE5a2p5a2Q44CCIiwi5pyJ6LOH5rqQ5Y+I6IO95Yqb6LyD5byx55qE5a2455Sf5oeJ5pu05bi46KOc57+S44CCIl1dfSwidW5pdDQiOnsidGl0bGUiOiLmjqLntKLmnKrkvoYgNO+9nOaIkeaDs+S4iuS7gOm6vOiqsu+8nyIsInF1ZXN0aW9ucyI6WyJRMe+8muatt+W5tOS+huWkp+WtuOeUn+eahOS8kemAgOWtuOavlOeOh+WmguS9leiuiuWMlu+8nyIsIlEy77ya6YCg5oiQ5q2k6K6K5YyW55qE5Y6f5Zug54K65L2V77yfIiwiUTPvvJrlpoLmnpzkvaDmmK/nt6jlr6voqrLntrHnmoTkurrlk6HvvIzkvaDmnIPlpoLkvZXopo/lioPkuIDpgLHnmoToqrLnqIvvvJ/oq4vopo/lioPoqrLnqIvkuKboqqrmmI7ljp/lm6DjgIIiXSwiYW5zd2VycyI6W1si5LyR6YCA5a245q+U546H6YCQ5bm05LiK5Y2H77yM6L+R5LqM5Y2B5bm05oiQ6ZW36LaF6YGO5LiA5YCN44CCIiwi5pW06auU5ZGI5LiK5Y2H6Lao5Yui77yMMTA25a245bm05bqm57SE5q+PMTDkurrmnIkx5Lq644CCIiwi5aSn5a2455Sf5LyR6YCA5a245q+U5L6L6ZW35pyf5aKe5Yqg77yM6ICM5LiU5aKe5bmF5piO6aGv44CCIiwi6L+R5LqM5Y2B5bm05LyR6YCA5a24546H5oyB57qM5o+Q6auY77yM5bey6LaF6YGO5Y6f5pys5LiA5YCN44CCIiwi5b6eOTDliLAxMDblrbjlubTluqbvvIzkvJHpgIDlrbjmr5TnjofmmI7poa/kuIrljYfjgIIiLCLkvJHpgIDlrbjnjofotorkvobotorpq5jvvIwxMDblrbjlubTluqbntITpgZTkuIDmiJDjgIIiLCLmlbTpq5TkuIDot6/lop7liqDvvIzmnIDlvozlpKfntITmr4/ljYHkvY3lsLHmnInkuIDkvY3jgIIiLCLos4fmlpnpoa/npLrkvJHpgIDlrbjmr5TnjofplbfmnJ/lkYjnj77kuIrljYfjgIIiLCLkvJHpgIDlrbjmr5Tkvovmr5TkuozljYHlubTliY3pq5jlh7roqLHlpJrvvIzotoXpgY7kuIDlgI3jgIIiLCLotqjli6LmmK/pgJDlubTmj5Dpq5jvvIzliLAxMDblrbjlubTluqbntIQxMO+8heOAgiIsIuWkp+WtuOeUn+S8kemAgOWtuOaDheazgeiuiuWkmu+8jOavlOS+i+aMgee6jOaIkOmVt+OAgiIsIui/keS6jOWNgeW5tOS8kemAgOWtuOeOh+WinuWKoOi2hemBjuS4gOWAjeOAgiIsIuS8kemAgOWtuOavlOS+i+aYjumhr+S4iuWNh++8jOW+jOacn+W3suaOpei/keS4gOaIkOOAgiIsIuaVtOmrlOS4jeaYr+S4i+mZje+8jOiAjOaYr+mAkOatpeWinuWKoOOAgiIsIjkw5a245bm05bqm5b6M5LyR6YCA5a245q+U546H5aSn6Ie05oyB57qM5b6A5LiK44CCIiwiMTA25a245bm05bqm57SE5LiA5oiQ5a2455Sf5pyJ5LyR5a245oiW6YCA5a245oOF5b2i44CCIiwi6ZW35pyf5L6G55yL77yM5LyR6YCA5a245Lq65pW45Y2g5q+U6LaK5L6G6LaK6auY44CCIiwi5LyR6YCA5a245q+U546H5b6e6LyD5L2O5rC05rqW6YCQ5ry45Y2H5Yiw57SEMTDvvIXjgIIiLCLos4fmlpnpoa/npLrlpKflrbjkvJHpgIDlrbjllY/poYzpgJDlubTliqDph43jgIIiLCLkuozljYHlubTplpPkvJHpgIDlrbjmr5TnjofmiJDplbfotoXpgY7kuIDlgI3jgIIiLCLkvJHpgIDlrbjnjoflkYjkuIrljYfotqjli6LvvIzkuKbpnZ7nn63mnJ/ms6Lli5XjgIIiLCLmnIDlvozntITmr48xMOWQjeWkp+WtuOeUn+WwseaciTHlkI3kvJHpgIDlrbjjgIIiLCLmr5TnjofpgJDlubTmj5Dpq5jvvIwxMDblrbjlubTluqbkvobliLDntITkuIDmiJDjgIIiLCLlpKflrbjnlJ/kvJHpgIDlrbjmr5TkvovplbfmnJ/mmI7poa/lop7liqDjgIIiLCLmlbTpq5Tlvp7kvY7mlrzkuIDmiJDpgJDmvLjljYfliLDmjqXov5ExMO+8heOAgiIsIuizh+aWmeWPr+eci+WHuuS8kemAgOWtuOaDheazgeS4gOW5tOavlOS4gOW5tOWkmuOAgiIsIumVt+acn+i2qOWLouWQkeS4iu+8jOWinuW5hei2hemBjuS4gOWAjeOAgiIsIuS8kemAgOWtuOeOh+aMgee6jOWinuWKoO+8jOacgOW+jOW3sue0hOmBlOWNgeWIhuS5i+S4gOOAgiJdLFsi5pyA5aSn5Y6f5Zug5piv5b+X6Laj5LiN5ZCI77yM6aGv56S65a2455Sf57y65bCR6YGp5oCn5o6i57Si44CCIiwi6Kix5aSa5a2455Sf6YG46Yyv5pa55ZCR77yM5b+X6Laj5LiN5ZCI5Y2gMjguNO+8heOAgiIsIuiAg+ippuWNh+WtuOWwjuWQke+8jOS9v+WtuOeUn+mAsuWkp+WtuOW+jOaJjeeZvOePvuS4jemBqeWQiOOAgiIsIuekvuacg+mHjeWIhuaVuO+8jOWtuOeUn+e8uuWwkeaOoue0ouiIiOi2o+iIh+iDveWKm+eahOapn+acg+OAgiIsIuW/l+i2o+S4jeWQiOaYr+S4u+WboO+8jOWPjeaYoOmBuOezu+iIh+iIiOi2o+acieiQveW3ruOAgiIsIuS7peiAg+ippuWIhuaVuOmBuOagoeezu++8jOWPr+iDveW/veeVpeecn+ato+eahOiIiOi2o+OAgiIsIuWtuOeUn+WNh+WtuOWJjee8uuWwkeeUn+a2r+aOoue0ou+8jOmAsuWkp+WtuOW+jOWuueaYk+i/t+WkseOAgiIsIuekvuacg+S7jemHjeimluWNh+WtuO+8jOmBqeaAp+eZvOWxleaykuacieWPl+WIsOi2s+WkoOmHjeimluOAgiIsIuS4u+imgeaYr+W/l+i2o+S4jeWQiO+8jOS7o+ihqOmBuOaTh+iIh+iHqui6q+iIiOi2o+S4jeespuOAgiIsIuWutumVt+iIh+aVmeiCsuS7jeWBj+iAg+ippuWwjuWQke+8jOWtuOeUn+i8g+WwkeaOoue0ouW/l+WQkeOAgiIsIuWkmuWFg+WFpeWtuOWinuWKoO+8jOS9huekvuacg+ingOW/teS7jeWBnOeVmeWcqOWNh+WtuOertueIreOAgiIsIuWtuOeUn+W4uOS+neWIhuaVuOmBuOagoeezu++8jOiAjOS4jeaYr+S+neiIiOi2o+mBuOaTh+OAgiIsIuS8kemAgOWtuOS4u+WboOaYr+W/l+i2o+S4jeWQiO+8jOWNoOWFqOmDqOWOn+WboDI4LjTvvIXjgIIiLCLnvLrkuY/pganmgKfmjqLntKLvvIzkvb/lrbjnlJ/pgLLlpKflrbjlvozmiY3nmbznj77pgbjpjK/jgIIiLCLljYflrbjliLbluqbmlLnororvvIzkvYbogIPoqablsI7lkJHnmoTop4Dlv7XmspLmnInot5/okZfmlLnjgIIiLCLnpL7mnIPpgY7luqbph43oppbljYflrbjvvIzlrbjnlJ/ovIPpm6Pmib7liLDpganlkIjmlrnlkJHjgIIiLCLpg6jliIblrbjnlJ/lj6rmmK/ngrrkuobljYflrbjvvIzmspLmnInlhYjnorroqo3oh6rlt7HnmoTlv5fotqPjgIIiLCLlhaXlrbjploDmqrvpmY3kvY7kuI3mmK/kuLvlm6DvvIzlv5fotqPokL3lt67mm7TlgLzlvpfms6jmhI/jgIIiLCLlrbjnlJ/nvLrkuY/nlJ/mtq/mjqLntKLvvIzlj6/og73pgKDmiJDpgLLlpKflrbjlvozkuI3pganmh4njgIIiLCLogIPoqabliIbmlbjku43kuLvlsI7pgbjmk4fvvIzlrrnmmJPoiIflgIvkurrlv5flkJHkuI3nrKbjgIIiLCLmnIDluLjopovljp/lm6DmmK/lv5fotqPkuI3lkIjvvIzpoa/npLrpganmgKfmlZnogrLkuI3otrPjgIIiLCLmlZnogrLnj77loLTmjqLntKLmqZ/mnIPkuI3otrPvvIzlrbjnlJ/lj6/og73pgbjliLDkuI3pganlkIjnp5Hns7vjgIIiLCLljYflrbjlsI7lkJHorpPlrbjnlJ/lhYjov73msYLkuIrlpKflrbjvvIzlho3mgJ3ogIPmg7PlgZrku4DpurzjgIIiLCLlrrbplbflkozlrbjmoKHoi6Xlj6rnnIvliIbmlbjvvIzlrrnmmJPlv73nlaXlrbjnlJ/nnJ/mraPoiIjotqPjgIIiLCLlpJrlhYPlhaXlrbjmnKrlv4Xog73op6PmsbrnpL7mnIPpgY7luqbph43oppbogIPoqabnmoTllY/poYzjgIIiLCLkuLvopoHlkozlv5fotqPkuI3lkIjjgIHpganmgKfmjqLntKLkuI3otrPmnInpl5zjgIIiLCLlrbjnlJ/mspLmnInmj5Dml6noqo3orZjoh6rlt7HvvIzljYflrbjlvozovIPlrrnmmJPmg7PovYnmj5vmlrnlkJHjgIIiLCLos4fmlpnpoa/npLrkvJHpgIDlrbjlkozlv5fotqPkuI3lkIjjgIHljYflrbjop4Dlv7Xpg73mnInpl5zjgIIiXSxbIuaIkeacg+WinuWKoOeUn+a2r+iIh+eQhuiyoeiqsu+8jOiuk+WtuOeUn+abtOaXqeiqjeitmOiHquW3seOAgiIsIuaIkeaDs+WinuWKoOiBt+WgtOmrlOmpl++8jOW5q+WKqeWtuOeUn+eiuuiqjeecn+ato+eahOiIiOi2o+OAgiIsIuS/neeVmeWfuuekjuWtuOenke+8jOWGjeeUqOWvpuS9nOiqsuaOoue0oumBqeWQiOeahOaWueWQkeOAgiIsIuaIkeacg+a4m+WwkemHjeikh+e3tOe/ku+8jOaKiuaZgumWk+eVmee1pueUn+a2r+aOoue0ouOAgiIsIuavj+mAseWKoOWFpeeUn+a2r+iIh+eQhuiyoeiqsu+8jOiuk+WtuOe/kuabtOiyvOi/keeUn+a0u+OAgiIsIuaIkeacg+WinuWKoOiBt+WgtOWPg+ioqu+8jOiuk+WtuOeUn+WFiOS6huino+W3peS9nOWFp+WuueOAgiIsIuimj+WKg+eQhuiyoeiIh+a6nemAmuiqsu+8jOijnOi2s+acquS+hueUn+a0u+mcgOimgeeahOiDveWKm+OAgiIsIua4m+WwkeiDjOiqpu+8jOWkmuWBmuWwiOmhjO+8jOiuk+WtuOeUn+e3tOe/kuWvpumam+aHieeUqOOAgiIsIuS/neeVmeWci+iLseaVuOaguOW/g++8jOWGjeWinuWKoOiHquS4u+aOoue0oueahOaZgumWk+OAgiIsIuaIkeacg+WinuWKoOWQiOS9nOiIh+ihqOmBlOiqsu+8jOWfuemkiuacquS+huiBt+WgtOiDveWKm+OAgiIsIuavj+mAseWuieaOkuiBt+a2r+aOoue0ou+8jOmBv+WFjeWPqumdoOWIhuaVuOaxuuWumuaWueWQkeOAgiIsIuWKoOWFpeeUn+a0u+aKgOiDveiqsu+8jOiuk+WtuOeUn+efpemBk+efpeitmOWmguS9leS9v+eUqOOAgiIsIuWinuWKoOenkeaKgOWvpuS9nO+8jOiuk+WtuOeUn+W+nuaTjeS9nOS4reeZvOePvuiIiOi2o+OAgiIsIuaIkeacg+WuieaOkuWwiOmhjOiqsu+8jOe3tOe/kuWQiOS9nOiIh+ino+axuuecn+WvpuWVj+mhjOOAgiIsIuWinuioreiBt+a2r+iIh+eQhuiyoeiqsu+8jOiuk+WtuOeUn+aPkOaXqea6luWCmeacquS+huOAgiIsIua4m+WwkemHjeikh+iAg+ippue3tOe/ku+8jOWinuWKoOaOoue0ouiIiOi2o+eahOaZgumWk+OAgiIsIuWKoOWFpeiBt+WgtOWPg+ioquiIh+WvpuS9nO+8jOW5q+WKqeWtuOeUn+eiuuiqjeW/l+i2o+OAgiIsIuavj+mAseWuieaOkuiHquS4u+aOoue0ou+8jOiuk+WtuOeUn+aOpeinuOS4jeWQjOmgmOWfn+OAgiIsIuWinuWKoOenkeaKgOiIh+eQhuiyoeiqsu+8jOWbnuaHieacquS+hueUn+a0u+WSjOW3peS9nOmcgOaxguOAgiIsIuS/neeVmeWfuuacrOWtuOenke+8jOWGjeWKoOWFpei3qOmgmOWfn+WvpuS9nOiqsueoi+OAgiIsIuWKoOWFpeaDhee3kuiIh+a6nemAmuiqsu+8jOWfuemkiuiqsuacrOS7peWklueahOi7n+WvpuWKm+OAgiIsIuaIkeacg+WwkeS4gOm7nuiAg+ippuiqsu+8jOWkmuWuieaOkueUn+a2r+aOoue0ouWSjOWvpuS9nOOAgiIsIuWinuWKoOWVj+mhjOino+axuuiqsu+8jOiuk+WtuOeUn+e3tOe/kumdouWwjeecn+WvpuaDheWig+OAgiIsIuWuieaOkueUn+a2r+OAgeeQhuiyoeiIh+WwiOmhjOiqsu+8jOWFvOmhp+efpeitmOWSjOaHieeUqOOAgiIsIuWinuWKoOmBuOS/ruiqsu+8jOiuk+WtuOeUn+iDveS+neiHquW3seeahOiIiOi2o+WBmumBuOaTh+OAgiIsIuWKoOWFpeiBt+WgtOiDveWKm+iok+e3tO+8jOmBv+WFjeiqsueoi+WPquWJqeiAg+ippuWIhuaVuOOAgiIsIuWuieaOkuabtOWkmuWvpuS9nOmBuOS/ru+8jOW5q+WKqeWtuOeUn+aJvuWIsOmBqeWQiOmgmOWfn+OAgiIsIuWinuWKoOeUn+a2r+aOoue0ouiIh+iHquS4u+WtuOe/ku+8jOiuk+mBuOaTh+abtOacieS+neaTmuOAgiJdXX0sInVuaXQ1Ijp7InRpdGxlIjoi5o6i57Si5pyq5L6GIDXvvZzmiJHmnKrkvobopoHlgZrku4DpurzvvJ8iLCJub3RlIjoi55Sf5rS76aCQ566X6IiH6IG35rav6Jaq6LOH54K65a2457+S56S65L6L77yb5a+m6Zqb6Jaq6LOH6KuL5L6d55W25pyf5Lq65Yqb6YqA6KGM6LOH5paZ5p+l6Kmi44CCIiwicXVlc3Rpb25zIjpbIlEx77ya5a6M5oiQMjDlubTlvoznmoToh6rlt7HkuIDmnIjnlJ/mtLvpoJDnrpfooajjgIIiLCJRMu+8muagueaTmuavj+aciOa3qOaUtuWFpemcgOaxgu+8jOaOoue0ouespuWQiOmcgOaxgueahOiBt+alre+8jOWIl+WHuuiWquizh+OAgeaineS7tuOAgeW3peS9nOWFp+WuueWPiuihjOWLleOAgiJdLCJhbnN3ZXJzIjpbWyLpo5/vvJo4LDUwMOWFg1xu6KGj77yaMSw4MDDlhYNcbuS9j++8mjE0LDAwMOWFg1xu6KGM77yaMiw1MDDlhYNcbuiCsu+8mjEsODAw5YWDXG7mqILvvJoyLDgwMOWFg1xu6Zuc77yaMywwMDDlhYNcbue4veioiO+8mjM0LDQwMOWFgyIsIumjn++8mjksMDAw5YWDXG7ooaPvvJoxLDUwMOWFg1xu5L2P77yaMTUsMDAw5YWDXG7ooYzvvJoyLDIwMOWFg1xu6IKy77yaMiwwMDDlhYNcbuaogu+8mjIsNTAw5YWDXG7pm5zvvJoyLDgwMOWFg1xu57i96KiI77yaMzUsMDAw5YWDIiwi6aOf77yaOCwwMDDlhYNcbuiho++8mjIsMjAw5YWDXG7kvY/vvJoxMyw1MDDlhYNcbuihjO+8mjMsMDAw5YWDXG7ogrLvvJoyLDUwMOWFg1xu5qiC77yaMywyMDDlhYNcbumbnO+8mjIsODAw5YWDXG7nuL3oqIjvvJozNSwyMDDlhYMiLCLpo5/vvJo5LDUwMOWFg1xu6KGj77yaMiwwMDDlhYNcbuS9j++8mjE2LDAwMOWFg1xu6KGM77yaMiw1MDDlhYNcbuiCsu+8mjEsODAw5YWDXG7mqILvvJozLDAwMOWFg1xu6Zuc77yaMywyMDDlhYNcbue4veioiO+8mjM4LDAwMOWFgyIsIumjn++8mjgsNTAw5YWDXG7ooaPvvJoxLDgwMOWFg1xu5L2P77yaMTUsMDAw5YWDXG7ooYzvvJoyLDgwMOWFg1xu6IKy77yaMiwyMDDlhYNcbuaogu+8mjMsNTAw5YWDXG7pm5zvvJozLDAwMOWFg1xu57i96KiI77yaMzYsODAw5YWDIiwi6aOf77yaNyw4MDDlhYNcbuiho++8mjEsNTAw5YWDXG7kvY/vvJoxMywwMDDlhYNcbuihjO+8mjIsNTAw5YWDXG7ogrLvvJoxLDgwMOWFg1xu5qiC77yaMiw4MDDlhYNcbumbnO+8mjIsNTAw5YWDXG7nuL3oqIjvvJozMSw5MDDlhYMiLCLpo5/vvJo5LDAwMOWFg1xu6KGj77yaMiwwMDDlhYNcbuS9j++8mjE0LDUwMOWFg1xu6KGM77yaMywyMDDlhYNcbuiCsu+8mjIsMDAw5YWDXG7mqILvvJozLDAwMOWFg1xu6Zuc77yaMywwMDDlhYNcbue4veioiO+8mjM2LDcwMOWFgyIsIumjn++8mjgsODAw5YWDXG7ooaPvvJoxLDgwMOWFg1xu5L2P77yaMTQsMDAw5YWDXG7ooYzvvJoyLDYwMOWFg1xu6IKy77yaMiw1MDDlhYNcbuaogu+8mjMsMDAw5YWDXG7pm5zvvJozLDUwMOWFg1xu57i96KiI77yaMzYsMjAw5YWDIiwi6aOf77yaMTAsMDAw5YWDXG7ooaPvvJoyLDUwMOWFg1xu5L2P77yaMTYsMDAw5YWDXG7ooYzvvJoyLDUwMOWFg1xu6IKy77yaMiwwMDDlhYNcbuaogu+8mjMsNTAw5YWDXG7pm5zvvJozLDUwMOWFg1xu57i96KiI77yaNDAsMDAw5YWDIiwi6aOf77yaOCwyMDDlhYNcbuiho++8mjEsNTAw5YWDXG7kvY/vvJoxMyw1MDDlhYNcbuihjO+8mjIsMjAw5YWDXG7ogrLvvJoyLDUwMOWFg1xu5qiC77yaMiw4MDDlhYNcbumbnO+8mjIsODAw5YWDXG7nuL3oqIjvvJozMyw1MDDlhYMiLCLpo5/vvJo4LDUwMOWFg1xu6KGj77yaMSw4MDDlhYNcbuS9j++8mjE0LDAwMOWFg1xu6KGM77yaMiw1MDDlhYNcbuiCsu+8mjIsMDAw5YWDXG7mqILvvJozLDAwMOWFg1xu6Zuc77yaMywyMDDlhYNcbue4veioiO+8mjM1LDAwMOWFgyIsIumjn++8mjksMDAw5YWDXG7ooaPvvJoxLDgwMOWFg1xu5L2P77yaMTUsMDAw5YWDXG7ooYzvvJoyLDUwMOWFg1xu6IKy77yaMSw4MDDlhYNcbuaogu+8mjMsMjAw5YWDXG7pm5zvvJozLDAwMOWFg1xu57i96KiI77yaMzYsMzAw5YWDIiwi6aOf77yaOSwyMDDlhYNcbuiho++8mjIsMDAw5YWDXG7kvY/vvJoxNSw1MDDlhYNcbuihjO+8mjIsODAw5YWDXG7ogrLvvJoyLDIwMOWFg1xu5qiC77yaMywwMDDlhYNcbumbnO+8mjMsNTAw5YWDXG7nuL3oqIjvvJozOCwyMDDlhYMiLCLpo5/vvJo4LDAwMOWFg1xu6KGj77yaMSw2MDDlhYNcbuS9j++8mjEzLDAwMOWFg1xu6KGM77yaMiwyMDDlhYNcbuiCsu+8mjEsODAw5YWDXG7mqILvvJoyLDUwMOWFg1xu6Zuc77yaMiw4MDDlhYNcbue4veioiO+8mjMxLDkwMOWFgyIsIumjn++8mjgsNTAw5YWDXG7ooaPvvJoxLDgwMOWFg1xu5L2P77yaMTMsNTAw5YWDXG7ooYzvvJoyLDUwMOWFg1xu6IKy77yaMSw4MDDlhYNcbuaogu+8mjIsODAw5YWDXG7pm5zvvJozLDAwMOWFg1xu57i96KiI77yaMzMsOTAw5YWDIiwi6aOf77yaOSwwMDDlhYNcbuiho++8mjIsMDAw5YWDXG7kvY/vvJoxNSwwMDDlhYNcbuihjO+8mjIsNjAw5YWDXG7ogrLvvJoyLDAwMOWFg1xu5qiC77yaMywwMDDlhYNcbumbnO+8mjMsMjAw5YWDXG7nuL3oqIjvvJozNiw4MDDlhYMiLCLpo5/vvJo5LDUwMOWFg1xu6KGj77yaMiwyMDDlhYNcbuS9j++8mjE2LDAwMOWFg1xu6KGM77yaMiw4MDDlhYNcbuiCsu+8mjIsNTAw5YWDXG7mqILvvJozLDUwMOWFg1xu6Zuc77yaMyw1MDDlhYNcbue4veioiO+8mjQwLDAwMOWFgyIsIumjn++8mjgsODAw5YWDXG7ooaPvvJoyLDAwMOWFg1xu5L2P77yaMTUsMDAw5YWDXG7ooYzvvJoyLDUwMOWFg1xu6IKy77yaMiw1MDDlhYNcbuaogu+8mjMsMjAw5YWDXG7pm5zvvJozLDIwMOWFg1xu57i96KiI77yaMzcsMjAw5YWDIiwi6aOf77yaMTAsMDAw5YWDXG7ooaPvvJoyLDUwMOWFg1xu5L2P77yaMTcsMDAw5YWDXG7ooYzvvJozLDAwMOWFg1xu6IKy77yaMiw1MDDlhYNcbuaogu+8mjQsMDAw5YWDXG7pm5zvvJo0LDAwMOWFg1xu57i96KiI77yaNDMsMDAw5YWDIiwi6aOf77yaOCw1MDDlhYNcbuiho++8mjEsODAw5YWDXG7kvY/vvJoxNCwwMDDlhYNcbuihjO+8mjIsNTAw5YWDXG7ogrLvvJoyLDIwMOWFg1xu5qiC77yaMywyMDDlhYNcbumbnO+8mjMsMDAw5YWDXG7nuL3oqIjvvJozNSwyMDDlhYMiLCLpo5/vvJo5LDAwMOWFg1xu6KGj77yaMiwwMDDlhYNcbuS9j++8mjE1LDAwMOWFg1xu6KGM77yaMiw4MDDlhYNcbuiCsu+8mjIsMjAw5YWDXG7mqILvvJozLDAwMOWFg1xu6Zuc77yaMywyMDDlhYNcbue4veioiO+8mjM3LDIwMOWFgyIsIumjn++8mjksMjAw5YWDXG7ooaPvvJoyLDIwMOWFg1xu5L2P77yaMTYsMDAw5YWDXG7ooYzvvJozLDAwMOWFg1xu6IKy77yaMiwwMDDlhYNcbuaogu+8mjMsNTAw5YWDXG7pm5zvvJozLDUwMOWFg1xu57i96KiI77yaMzksNDAw5YWDIiwi6aOf77yaOCw1MDDlhYNcbuiho++8mjIsMDAw5YWDXG7kvY/vvJoxNCw1MDDlhYNcbuihjO+8mjIsNjAw5YWDXG7ogrLvvJoyLDIwMOWFg1xu5qiC77yaMyw1MDDlhYNcbumbnO+8mjMsMjAw5YWDXG7nuL3oqIjvvJozNiw1MDDlhYMiLCLpo5/vvJo5LDUwMOWFg1xu6KGj77yaMiw1MDDlhYNcbuS9j++8mjE2LDAwMOWFg1xu6KGM77yaMiw4MDDlhYNcbuiCsu+8mjIsMjAw5YWDXG7mqILvvJozLDUwMOWFg1xu6Zuc77yaMyw4MDDlhYNcbue4veioiO+8mjQwLDMwMOWFgyIsIumjn++8mjgsMDAw5YWDXG7ooaPvvJoxLDUwMOWFg1xu5L2P77yaMTMsNTAw5YWDXG7ooYzvvJoyLDIwMOWFg1xu6IKy77yaMSw4MDDlhYNcbuaogu+8mjIsODAw5YWDXG7pm5zvvJoyLDgwMOWFg1xu57i96KiI77yaMzIsNjAw5YWDIiwi6aOf77yaOCw1MDDlhYNcbuiho++8mjEsODAw5YWDXG7kvY/vvJoxNCwwMDDlhYNcbuihjO+8mjIsNjAw5YWDXG7ogrLvvJoyLDAwMOWFg1xu5qiC77yaMywwMDDlhYNcbumbnO+8mjMsMDAw5YWDXG7nuL3oqIjvvJozNCw5MDDlhYMiLCLpo5/vvJo5LDgwMOWFg1xu6KGj77yaMiwzMDDlhYNcbuS9j++8mjE2LDUwMOWFg1xu6KGM77yaMywwMDDlhYNcbuiCsu+8mjIsMjAw5YWDXG7mqILvvJozLDgwMOWFg1xu6Zuc77yaMyw1MDDlhYNcbue4veioiO+8mjQxLDEwMOWFgyIsIumjn++8mjksMDAw5YWDXG7ooaPvvJoyLDAwMOWFg1xu5L2P77yaMTUsMDAw5YWDXG7ooYzvvJoyLDgwMOWFg1xu6IKy77yaMiw1MDDlhYNcbuaogu+8mjMsMjAw5YWDXG7pm5zvvJozLDUwMOWFg1xu57i96KiI77yaMzgsMDAw5YWDIl0sWyLmt6jmlLblhaXpnIDmsYLvvJozNCw0MDDlhYNcbuiBt+alre+8mui7n+mrlOW3peeoi+W4q1xu5pyI6Jaq77ya57SENTUsMDAw772eODAsMDAw5YWDXG7lubTolqrvvJrntIQ2Nu+9njk26JCs5YWDXG7mop3ku7bvvJros4foqIrnm7jpl5znp5Hns7vjgIHnqIvlvI/og73liptcbuW3peS9nO+8mumWi+eZvOOAgea4rOippuiIh+e2reitt+ezu+e1sVxu5pyA5L2O5beu6Led77ya57SEMjAsNjAw5YWDXG7liKTmlrfvvJrolqros4fpq5jmlrzpnIDmsYLvvIzpgoTog73kv53nlZnpg6jliIblhLLok4TjgIJcbuihjOWLle+8muWtuOeoi+W8j+S4pue0r+epjeWwiOmhjOS9nOWTgSIsIua3qOaUtuWFpemcgOaxgu+8mjM1LDAwMOWFg1xu6IG35qWt77ya5Y2K5bCO6auU6Kit5YKZ5bel56iL5birXG7mnIjolqrvvJrntIQ1MiwwMDDvvZ43NSwwMDDlhYNcbuW5tOiWqu+8mue0hDYy772eOTDokKzlhYNcbuaineS7tu+8mueQhuW3peenkeezu+OAgeiLseaWh+iIh+ioreWCmeefpeitmFxu5bel5L2c77ya57at6K236Kit5YKZ5Lim5o6S6Zmk6KO956iL55Ww5bi4XG7mnIDkvY7lt67ot53vvJrntIQxNywwMDDlhYNcbuWIpOaWt++8muaUtuWFpeWPr+aUr+aHieeUn+a0u++8jOS5n+acieWtmOmMouepuumWk+OAglxu6KGM5YuV77ya5Yqg5by355CG5YyW6Iux5paH6IiH5bel56iL5a+m5L2cIiwi5reo5pS25YWl6ZyA5rGC77yaMzUsMjAw5YWDXG7ogbfmpa3vvJros4fmlpnliIbmnpDluKtcbuaciOiWqu+8mue0hDQ4LDAwMO+9njcwLDAwMOWFg1xu5bm06Jaq77ya57SENTfvvZ44NOiQrOWFg1xu5qKd5Lu277ya57Wx6KiI6IO95Yqb44CBRXhjZWzoiIdQeXRob25cbuW3peS9nO+8muaVtOeQhuizh+aWmeS4puijveS9nOWIhuaekOWgseWRilxu5pyA5L2O5beu6Led77ya57SEMTIsODAw5YWDXG7liKTmlrfvvJrolqros4fnrKblkIjpnIDmsYLvvIzkvYbku43opoHmjqfliLbpoY3lpJbmlK/lh7rjgIJcbuihjOWLle+8muWtuOe1seioiOS4pue0r+epjeWIhuaekOS9nOWTgSIsIua3qOaUtuWFpemcgOaxgu+8mjM4LDAwMOWFg1xu6IG35qWt77ya6LOH5a6J5bel56iL5birXG7mnIjolqrvvJrntIQ1NSwwMDDvvZ44MCwwMDDlhYNcbuW5tOiWqu+8mue0hDY2772eOTbokKzlhYNcbuaineS7tu+8muizh+ioiuenkeezu+OAgee2sui3r+iIh+izh+WuieaKgOiDvVxu5bel5L2c77ya55uj5o6n6aKo6Zqq5Lim6JmV55CG6LOH6KiK5a6J5YWo5LqL5Lu2XG7mnIDkvY7lt67ot53vvJrntIQxNywwMDDlhYNcbuWIpOaWt++8muaUtuWFpemrmOaWvOmgkOeul++8jOeUn+a0u+Wjk+WKm+ebuOWwjei8g+S9juOAglxu6KGM5YuV77ya57e057ay6Lev5oqA6KGT5Lim5rqW5YKZ6LOH5a6J6K2J54WnIiwi5reo5pS25YWl6ZyA5rGC77yaMzYsODAw5YWDXG7ogbfmpa3vvJrpm7vmqZ/lt6XnqIvluKtcbuaciOiWqu+8mue0hDUwLDAwMO+9njcwLDAwMOWFg1xu5bm06Jaq77ya57SENjDvvZ44NOiQrOWFg1xu5qKd5Lu277ya6Zu75qmf55u46Zec56eR57O744CB6Zu76Lev6IO95YqbXG7lt6XkvZzvvJroqK3oqIjmuKzoqabpm7vot6/oiIfoqK3lgplcbuacgOS9juW3rui3ne+8mue0hDEzLDIwMOWFg1xu5Yik5pa377ya6Jaq6LOH6Laz5aSg77yM6YKE6IO95a6J5o6S5Zu65a6a5YSy6JOE44CCXG7ooYzli5XvvJrliqDlvLfmlbjnkIbkuKbntK/nqY3pm7vot6/lr6bkvZwiLCLmt6jmlLblhaXpnIDmsYLvvJozMSw5MDDlhYNcbuiBt+alre+8muapn+aisOW3peeoi+W4q1xu5pyI6Jaq77ya57SENDUsMDAw772eNjUsMDAw5YWDXG7lubTolqrvvJrntIQ1NO+9njc46JCs5YWDXG7mop3ku7bvvJrmqZ/morDnp5Hns7vjgIHoo73lnJboiIfoqK3oqIjog73liptcbuW3peS9nO+8muioreioiOapn+ani+S4puaUueWWhOeUn+eUouioreWCmVxu5pyA5L2O5beu6Led77ya57SEMTMsMTAw5YWDXG7liKTmlrfvvJrln7rmnKzmlLblhaXotrPku6XmlK/mh4nnm67liY3poJDnrpfjgIJcbuihjOWLle+8muWtuOijveWclui7n+mrlOS4puWPg+WKoOWvpuS9nOertuizvSIsIua3qOaUtuWFpemcgOaxgu+8mjM2LDcwMOWFg1xu6IG35qWt77ya5Zyf5pyo5bel56iL5birXG7mnIjolqrvvJrntIQ0NSwwMDDvvZ42NSwwMDDlhYNcbuW5tOiWqu+8mue0hDU0772eNzjokKzlhYNcbuaineS7tu+8muWcn+acqOenkeezu+OAgeW3peeoi+iIh+a4rOmHj+iDveWKm1xu5bel5L2c77ya6KaP5YqD5bel56iL5Lim55uj552j5pa95bel5ZOB6LOqXG7mnIDkvY7lt67ot53vvJrntIQ4LDMwMOWFg1xu5Yik5pa377ya6Jaq6LOH55Wl6auY5pa86ZyA5rGC77yM5LuN6KaB5rOo5oSP5pSv5Ye644CCXG7ooYzli5XvvJrliqDlvLfmlbjnkIbkuKbkuobop6Plt6XnqIvorYnnhaciLCLmt6jmlLblhaXpnIDmsYLvvJozNiwyMDDlhYNcbuiBt+alre+8muitt+eQhuW4q1xu5pyI6Jaq77ya57SENDUsMDAw772eNjAsMDAw5YWDXG7lubTolqrvvJrntIQ1NO+9njcy6JCs5YWDXG7mop3ku7bvvJrorbfnkIbnp5Hns7vjgIHorbfnkIbluKvorYnnhadcbuW3peS9nO+8mueFp+itt+eXheS6uuS4puWft+ihjOmGq+eZguiZlee9rlxu5pyA5L2O5beu6Led77ya57SEOCw4MDDlhYNcbuWIpOaWt++8muaUtuWFpeWPr+iyoOaTlOeUn+a0u++8jOS9huW3rui3neS4jeeul+W+iOWkp+OAglxu6KGM5YuV77ya6K6A6K2355CG56eR57O75Lim6ICD6K2355CG5bir6K2J54WnIiwi5reo5pS25YWl6ZyA5rGC77yaNDAsMDAw5YWDXG7ogbfmpa3vvJrol6XluKtcbuaciOiWqu+8mue0hDU1LDAwMO+9njc1LDAwMOWFg1xu5bm06Jaq77ya57SENjbvvZ45MOiQrOWFg1xu5qKd5Lu277ya6Jel5a2457O744CB6Jel5bir5ZyL6ICD6K2J54WnXG7lt6XkvZzvvJroqr/lipHol6Xlk4HkuKbmj5DkvpvnlKjol6Xoq67oqaJcbuacgOS9juW3rui3ne+8mue0hDE1LDAwMOWFg1xu5Yik5pa377ya6Jaq6LOH6IO95pSv5oeJ6ZyA5rGC77yM5Lmf6IO95L+d55WZ57eK5oCl6aCQ5YKZ6YeR44CCXG7ooYzli5XvvJrliqDlvLfoh6rnhLbnp5HkuKbmupblgpnol6XlrbjljYflrbgiLCLmt6jmlLblhaXpnIDmsYLvvJozMyw1MDDlhYNcbuiBt+alre+8mueJqeeQhuayu+eZguW4q1xu5pyI6Jaq77ya57SENDUsMDAw772eNjAsMDAw5YWDXG7lubTolqrvvJrntIQ1NO+9njcy6JCs5YWDXG7mop3ku7bvvJrnianmsrvnp5Hns7vjgIHmsrvnmYLluKvorYnnhadcbuW3peS9nO+8muipleS8sOWLleS9nOS4pumAsuihjOW+qeWBpeayu+eZglxu5pyA5L2O5beu6Led77ya57SEMTEsNTAw5YWDXG7liKTmlrfvvJrmlLblhaXnrKblkIjpoJDnrpfvvIzku43pnIDopo/lioPlm7rlrprlhLLok4TjgIJcbuihjOWLle+8muiugOeJqeayu+enkeezu+S4puiAg+WwiOalreitieeFpyIsIua3qOaUtuWFpemcgOaxgu+8mjM1LDAwMOWFg1xu6IG35qWt77ya6IG36IO95rK755mC5birXG7mnIjolqrvvJrntIQ0NSwwMDDvvZ42MCwwMDDlhYNcbuW5tOiWqu+8mue0hDU0772eNzLokKzlhYNcbuaineS7tu+8muiBt+ayu+enkeezu+OAgeayu+eZguW4q+itieeFp1xu5bel5L2c77ya6KiT57e055Sf5rS76IiH5bel5L2c5rS75YuV6IO95YqbXG7mnIDkvY7lt67ot53vvJrntIQxMCwwMDDlhYNcbuWIpOaWt++8muiWquizh+i2s+WkoO+8jOS9huimgemBv+WFjeeUn+a0u+aUr+WHuuWinuWKoOOAglxu6KGM5YuV77ya5LqG6Kej6IG35rK756eR57O75Lim5rqW5YKZ6K2J54WnIiwi5reo5pS25YWl6ZyA5rGC77yaMzYsMzAw5YWDXG7ogbfmpa3vvJrphqvkuovmqqLpqZfluKtcbuaciOiWqu+8mue0hDQ1LDAwMO+9njU4LDAwMOWFg1xu5bm06Jaq77ya57SENTTvvZ42OeiQrOWFg1xu5qKd5Lu277ya6Yar5oqA56eR57O744CB6Yar5qqi5bir6K2J54WnXG7lt6XkvZzvvJrmqqLpqZfooYDmtrLoiIflkITpoZ7phqvnmYLmqqLpq5RcbuacgOS9juW3rui3ne+8mue0hDgsNzAw5YWDXG7liKTmlrfvvJrmlLblhaXpq5jmlrzpnIDmsYLvvIzlj6/lho3lronmjpLlhLLok4ToiIfpgLLkv67jgIJcbuihjOWLle+8muWKoOW8t+eUn+eJqeWMluWtuOS4pua6luWCmeWci+iAgyIsIua3qOaUtuWFpemcgOaxgu+8mjM4LDIwMOWFg1xu6IG35qWt77ya6Yar5LqL5pS+5bCE5birXG7mnIjolqrvvJrntIQ0OCwwMDDvvZ42NSwwMDDlhYNcbuW5tOiWqu+8mue0hDU3772eNzjokKzlhYNcbuaineS7tu+8mumGq+aUvuenkeezu+OAgeaUvuWwhOW4q+itieeFp1xu5bel5L2c77ya5pON5L2c5b2x5YOP6Kit5YKZ5Y2U5Yqp6Ki65pa3XG7mnIDkvY7lt67ot53vvJrntIQ5LDgwMOWFg1xu5Yik5pa377ya6Jaq6LOH56ym5ZCI6ZyA5rGC77yM5Lmf5pyJ5LiA5Lqb5b2I5oCn56m66ZaT44CCXG7ooYzli5XvvJroroDphqvmlL7np5Hns7vkuKbogIPlsIjmpa3orYnnhaciLCLmt6jmlLblhaXpnIDmsYLvvJozMSw5MDDlhYNcbuiBt+alre+8mueHn+mkiuW4q1xu5pyI6Jaq77ya57SENDIsMDAw772eNTUsMDAw5YWDXG7lubTolqrvvJrntIQ1MO+9njY26JCs5YWDXG7mop3ku7bvvJrnh5/ppIrnp5Hns7vjgIHnh5/ppIrluKvorYnnhadcbuW3peS9nO+8muioreioiOmjsumjn+S4pumAsuihjOeHn+mkiuipleS8sFxu5pyA5L2O5beu6Led77ya57SEMTAsMTAw5YWDXG7liKTmlrfvvJrmlLblhaXotrPku6XnlJ/mtLvvvIzkvYbku43pnIDopoHnkIbmgKfmtojosrvjgIJcbuihjOWLle+8muWKoOW8t+eUn+eJqeS4puS6huino+eHn+mkiuW4q+Wci+iAgyIsIua3qOaUtuWFpemcgOaxgu+8mjMzLDkwMOWFg1xu6IG35qWt77ya5ZyL5Lit5pWZ5birXG7mnIjolqrvvJrntIQ0NSwwMDDvvZ41OCwwMDDlhYNcbuW5tOiWqu+8mue0hDU0772eNjnokKzlhYNcbuaineS7tu+8muebuOmXnOenkeezu+OAgeaVmeiCsuWtuOeoi+iIh+aVmeW4q+itiVxu5bel5L2c77ya5pWZ5a2444CB5YKZ6Kqy5Y+K6LyU5bCO5a2455SfXG7mnIDkvY7lt67ot53vvJrntIQxMSwxMDDlhYNcbuWIpOaWt++8muiWquizh+WPr+aUr+aHiemgkOeul++8jOS5n+iDveeVmeS4i+mDqOWIhuWtmOasvuOAglxu6KGM5YuV77ya5Z+56aSK5bCI6ZW35Lim5L+u5pWZ6IKy5a2456iLIiwi5reo5pS25YWl6ZyA5rGC77yaMzYsODAw5YWDXG7ogbfmpa3vvJrmnIPoqIjluKvkuovli5nmiYDlr6noqIjlk6FcbuaciOiWqu+8mue0hDQ1LDAwMO+9njYwLDAwMOWFg1xu5bm06Jaq77ya57SENTTvvZ43MuiQrOWFg1xu5qKd5Lu277ya5pyD6KiI55u46Zec56eR57O744CB6LKh5pyD6IO95YqbXG7lt6XkvZzvvJrmn6XmoLjluLPli5nkuKbmlbTnkIbosqHli5nos4fmlplcbuacgOS9juW3rui3ne+8mue0hDgsMjAw5YWDXG7liKTmlrfvvJrmlLblhaXpq5jmlrzpnIDmsYLvvIzog73osqDmk5TnlJ/mtLvoiIflhLLok4TjgIJcbuihjOWLle+8muWtuOacg+ioiOS4pua6luWCmeebuOmXnOWwiOalreitieeFpyIsIua3qOaUtuWFpemcgOaxgu+8mjQwLDAwMOWFg1xu6IG35qWt77ya6YeR6J6N5YiG5p6Q5birXG7mnIjolqrvvJrntIQ1NSwwMDDvvZ44MCwwMDDlhYNcbuW5tOiWqu+8mue0hDY2772eOTbokKzlhYNcbuaineS7tu+8muWVhueuoeenkeezu+OAgeiyoeWLmeWIhuaekOiIh+iLseaWh1xu5bel5L2c77ya5YiG5p6Q5biC5aC05Lim6KmV5Lyw5oqV6LOH6aKo6ZqqXG7mnIDkvY7lt67ot53vvJrntIQxNSwwMDDlhYNcbuWIpOaWt++8muiWquizh+espuWQiOebruaome+8jOS9huWwiOalreiDveWKm+S5n+imgei3n+S4iuOAglxu6KGM5YuV77ya5Yqg5by36Iux5paH5pW45a246IiH6LKh5YuZ55+l6K2YIiwi5reo5pS25YWl6ZyA5rGC77yaMzcsMjAw5YWDXG7ogbfmpa3vvJpVSe+8j1VY6Kit6KiI5birXG7mnIjolqrvvJrntIQ1MCwwMDDvvZ43MCwwMDDlhYNcbuW5tOiWqu+8mue0hDYw772eODTokKzlhYNcbuaineS7tu+8muioreioiOiDveWKm+OAgeS7i+mdouW3peWFt+iIh+S9nOWTgembhlxu5bel5L2c77ya6KaP5YqD5LuL6Z2i5Lim5pS55ZaE5L2/55So6auU6amXXG7mnIDkvY7lt67ot53vvJrntIQxMiw4MDDlhYNcbuWIpOaWt++8muaUtuWFpeWPr+aUr+aHieeUn+a0u++8jOS9nOWTgeiDveWKm+acg+W9semfv+iWquizh+OAglxu6KGM5YuV77ya57e06Kit6KiI6Luf6auU5Lim5bu656uL5L2c5ZOB6ZuGIiwi5reo5pS25YWl6ZyA5rGC77yaNDMsMDAw5YWDXG7ogbfmpa3vvJrnlKLlk4HntpPnkIZcbuaciOiWqu+8mue0hDYwLDAwMO+9njkwLDAwMOWFg1xu5bm06Jaq77ya57SENzLvvZ4xMDjokKzlhYNcbuaineS7tu+8mua6nemAmuOAgeWIhuaekOiIh+WwiOahiOeuoeeQhuiDveWKm1xu5bel5L2c77ya6KaP5YqD55Si5ZOB5Lim5Y2U6Kq/5ZyY6ZqK6YCy5bqmXG7mnIDkvY7lt67ot53vvJrntIQxNywwMDDlhYNcbuWIpOaWt++8muiWquizh+mrmOaWvOmcgOaxgu+8jOS9huW3peS9nOiDveWKm+imgeaxguS5n+i8g+mrmOOAglxu6KGM5YuV77ya57e06KGo6YGU5Lim57Sv56mN5bCI6aGM566h55CG57aT6amXIiwi5reo5pS25YWl6ZyA5rGC77yaMzUsMjAw5YWDXG7ogbfmpa3vvJrmlbjkvY3ooYzpirfkvIHlioNcbuaciOiWqu+8mue0hDQ1LDAwMO+9njYwLDAwMOWFg1xu5bm06Jaq77ya57SENTTvvZ43MuiQrOWFg1xu5qKd5Lu277ya6KGM6Yq36IO95Yqb44CB5pW45pOa5YiG5p6Q6IiH5paH5qGIXG7lt6XkvZzvvJropo/lioPmtLvli5XkuKbliIbmnpDlu6PlkYrmiJDmlYhcbuacgOS9juW3rui3ne+8mue0hDksODAw5YWDXG7liKTmlrfvvJrmlLblhaXotrPlpKDvvIzkvYbopoHmjIHnuozntK/nqY3lsIjmpa3og73lipvjgIJcbuihjOWLle+8mue3tOaWh+ahiOS4puWtuOaVuOaTmuWIhuaekOW3peWFtyIsIua3qOaUtuWFpemcgOaxgu+8mjM3LDIwMOWFg1xu6IG35qWt77ya5bel5qWt6Kit6KiI5birXG7mnIjolqrvvJrntIQ0NSwwMDDvvZ42NSwwMDDlhYNcbuW5tOiWqu+8mue0hDU0772eNzjokKzlhYNcbuaineS7tu+8muioreioiOenkeezu+OAgeijveWclui7n+mrlOiIh+S9nOWTgembhlxu5bel5L2c77ya6Kit6KiI55Si5ZOB5aSW6KeA6IiH5L2/55So5pa55byPXG7mnIDkvY7lt67ot53vvJrntIQ3LDgwMOWFg1xu5Yik5pa377ya6Jaq6LOH5Y+v6LKg5pOU55Sf5rS777yM5LuN6KaB6aCQ55WZ5oSP5aSW5pSv5Ye644CCXG7ooYzli5XvvJrlrbjoqK3oqIjou5/pq5TkuKbntK/nqY3kvZzlk4EiLCLmt6jmlLblhaXpnIDmsYLvvJozOSw0MDDlhYNcbuiBt+alre+8muW7uuevieioreioiOS6uuWToVxu5pyI6Jaq77ya57SENTAsMDAw772eNzUsMDAw5YWDXG7lubTolqrvvJrntIQ2MO+9njkw6JCs5YWDXG7mop3ku7bvvJrlu7rnr4nnp5Hns7vjgIHoo73lnJboiIfnqbrplpPog73liptcbuW3peS9nO+8mue5quijveioreioiOWcluS4puWNlOWKqeW3peeoi+imj+WKg1xu5pyA5L2O5beu6Led77ya57SEMTAsNjAw5YWDXG7liKTmlrfvvJrmlLblhaXnrKblkIjpnIDmsYLvvIzkvYblsIjmpa3ppIrmiJDpnIDopoHmmYLplpPjgIJcbuihjOWLle+8mue3tOijveWcluS4pua6luWCmeW7uuevieWwiOalreiDveWKmyIsIua3qOaUtuWFpemcgOaxgu+8mjM2LDUwMOWFg1xu6IG35qWt77ya5a6k5YWn6Kit6KiI5birXG7mnIjolqrvvJrntIQ0NSwwMDDvvZ43MCwwMDDlhYNcbuW5tOiWqu+8mue0hDU0772eODTokKzlhYNcbuaineS7tu+8muepuumWk+ioreioiOOAgeijveWclui7n+mrlOiIh+S9nOWTgembhlxu5bel5L2c77ya6KaP5YqD56m66ZaT5Lim6IiH5bel56iL56uv5rqd6YCaXG7mnIDkvY7lt67ot53vvJrntIQ4LDUwMOWFg1xu5Yik5pa377ya6Jaq6LOH6Laz5aSg77yM5o6l5qGI6IO95Yqb5Lmf5Y+v6IO95b2x6Z+/5pS25YWl44CCXG7ooYzli5XvvJrntK/nqY3nqbrplpPoqK3oqIjoiIfoo73lnJbkvZzlk4EiLCLmt6jmlLblhaXpnIDmsYLvvJo0MCwzMDDlhYNcbuiBt+alre+8mueNuOmGq+W4q1xu5pyI6Jaq77ya57SENTAsMDAw772eODAsMDAw5YWDXG7lubTolqrvvJrntIQ2MO+9njk26JCs5YWDXG7mop3ku7bvvJrnjbjphqvns7vjgIHnjbjphqvluKvlnIvogIPorYnnhadcbuW3peS9nO+8muiouuWvn+WLleeJqeS4pumAsuihjOayu+eZgueFp+itt1xu5pyA5L2O5beu6Led77ya57SEOSw3MDDlhYNcbuWIpOaWt++8muaUtuWFpeWPr+aUr+aHieeUn+a0u++8jOWwiOalreizh+agvOaYr+mHjeimgeaineS7tuOAglxu6KGM5YuV77ya5Yqg5by36Ieq54S256eR5Lim5rqW5YKZ54246Yar5Y2H5a24Iiwi5reo5pS25YWl6ZyA5rGC77yaMzIsNjAw5YWDXG7ogbfmpa3vvJrlhazli5nkurrlk6FcbuaciOiWqu+8mue0hDQ1LDAwMO+9njYwLDAwMOWFg1xu5bm06Jaq77ya57SENTTvvZ43MuiQrOWFg1xu5qKd5Lu277ya56ym5ZCI6ICD6Kmm6LOH5qC85Lim6YCa6YGO5ZyL5a626ICD6KmmXG7lt6XkvZzvvJrovqbnkIbooYzmlL/mpa3li5noiIflhazlhbHmnI3li5lcbuacgOS9juW3rui3ne+8mue0hDEyLDQwMOWFg1xu5Yik5pa377ya6Jaq6LOH6auY5pa86ZyA5rGC77yM5L2G5LuN6KaB5YGa5aW96ZW35pyf6KaP5YqD44CCXG7ooYzli5XvvJrln7nppIrmlofmm7jog73lipvkuKbmupblgpnlnIvogIMiLCLmt6jmlLblhaXpnIDmsYLvvJozNCw5MDDlhYNcbuiBt+alre+8mueJqea1geimj+WKg+W4q1xu5pyI6Jaq77ya57SENDUsMDAw772eNjAsMDAw5YWDXG7lubTolqrvvJrntIQ1NO+9njcy6JCs5YWDXG7mop3ku7bvvJrnianmtYHnrqHnkIbjgIFFeGNlbOiIh+a6nemAmuiDveWKm1xu5bel5L2c77ya5a6J5o6S6YGL6Ly45Lim5pS55ZaE6YWN6YCB5rWB56iLXG7mnIDkvY7lt67ot53vvJrntIQxMCwxMDDlhYNcbuWIpOaWt++8muaUtuWFpeespuWQiOmgkOeul++8jOS5n+aHieaMgee6jOaPkOWNh+W3peS9nOiDveWKm+OAglxu6KGM5YuV77ya5a2454mp5rWB566h55CG6IiH6LOH5paZ5pW055CGIiwi5reo5pS25YWl6ZyA5rGC77yaNDEsMTAw5YWDXG7ogbfmpa3vvJroiKrnqbrnqbrmnI3lk6FcbuaciOiWqu+8mue0hDU1LDAwMO+9njgwLDAwMOWFg1xu5bm06Jaq77ya57SENjbvvZ45NuiQrOWFg1xu5qKd5Lu277ya5aSW6Kqe44CB5pyN5YuZ6IO95Yqb5Y+K6auU6IO95qKd5Lu2XG7lt6XkvZzvvJrntq3orbfpo5voiKrlronlhajkuKbmnI3li5nml4XlrqJcbuacgOS9juW3rui3ne+8mue0hDEzLDkwMOWFg1xu5Yik5pa377ya6Jaq6LOH6Laz5aSg77yM5L2G5bel5L2c6KGo54++5pyD5b2x6Z+/5a+m6Zqb5pS25YWl44CCXG7ooYzli5XvvJrliqDlvLfoi7Hmloflj6PoqqroiIfmnI3li5nntpPpqZciLCLmt6jmlLblhaXpnIDmsYLvvJozOCwwMDDlhYNcbuiBt+alre+8mueUn+mGq+W3peeoi+W4q1xu5pyI6Jaq77ya57SENTAsMDAw772eNzAsMDAw5YWDXG7lubTolqrvvJrntIQ2MO+9njg06JCs5YWDXG7mop3ku7bvvJrnlJ/phqvmiJblt6XnqIvnp5Hns7vjgIHlhIDlmajnn6XorZhcbuW3peS9nO+8mueglOeZvOiIh+e2reitt+mGq+eZguebuOmXnOioreWCmVxu5pyA5L2O5beu6Led77ya57SEMTIsMDAw5YWDXG7liKTmlrfvvJrmlLblhaXnrKblkIjpnIDmsYLvvIzmnKrkvobpgoTopoHntK/nqY3lsIjmpa3ntpPpqZfjgIJcbuihjOWLle+8muWKoOW8t+iHqueEtuaVuOWtuOiIh+W3peeoi+WvpuS9nCJdXX19"));
+document.addEventListener("DOMContentLoaded",()=>{{
+  const seatInput=document.getElementById("seat");
+  const showBtn=document.getElementById("showBtn");
+  const clearBtn=document.getElementById("clearBtn");
+  const printBtn=document.getElementById("printBtn");
+  const message=document.getElementById("message");
+  const result=document.getElementById("result");
+  const resultTitle=document.getElementById("resultTitle");
+  const seatBadge=document.getElementById("seatBadge");
+  const unitNote=document.getElementById("unitNote");
+  const qaList=document.getElementById("qaList");
 
-document.addEventListener("DOMContentLoaded", () => {
-  const seatInput = document.getElementById("seat");
-  const showBtn = document.getElementById("showBtn");
-  const clearBtn = document.getElementById("clearBtn");
-  const printBtn = document.getElementById("printBtn");
-  const message = document.getElementById("message");
-  const result = document.getElementById("result");
-  const resultTitle = document.getElementById("resultTitle");
-  const seatBadge = document.getElementById("seatBadge");
-  const unitNote = document.getElementById("unitNote");
-  const qaList = document.getElementById("qaList");
+  function selectedUnit(){{
+    const chosen=document.querySelector('input[name="unit"]:checked');
+    return chosen?chosen.value:null;
+  }}
 
-  function selectedUnit() {
-    const chosen = document.querySelector('input[name="unit"]:checked');
-    return chosen ? chosen.value : null;
-  }
+  function showAnswers(){{
+    const seat=seatInput.value.trim();
+    const unitKey=selectedUnit();
+    message.textContent="";
+    result.style.display="none";
 
-  function showAnswers() {
-    const seat = Number(seatInput.value);
-    const unitKey = selectedUnit();
-
-    message.textContent = "";
-    result.style.display = "none";
-
-    if (!validSeats.includes(seat)) {
-      message.textContent = "請輸入有效座號：1～15、20～32。";
+    if(!validSeats.includes(seat)){{
+      message.textContent="請輸入有效班級座號。";
       seatInput.focus();
       return;
-    }
-
-    if (!unitKey || !data[unitKey]) {
-      message.textContent = "請先選擇一張學習單。";
+    }}
+    if(!unitKey||!data[unitKey]){{
+      message.textContent="請先選擇一張學習單。";
       return;
-    }
+    }}
 
-    const answerIndex = validSeats.indexOf(seat);
-    const unit = data[unitKey];
+    const answerIndex=validSeats.indexOf(seat);
+    const unit=data[unitKey];
+    resultTitle.textContent=unit.title;
+    seatBadge.textContent=`班級座號 ${{seat}}`;
 
-    resultTitle.textContent = unit.title;
-    seatBadge.textContent = `座號 ${seat}`;
+    if(unit.note){{
+      unitNote.textContent=unit.note;
+      unitNote.style.display="block";
+    }}else{{
+      unitNote.textContent="";
+      unitNote.style.display="none";
+    }}
 
-    if (unit.note) {
-      unitNote.textContent = unit.note;
-      unitNote.style.display = "block";
-    } else {
-      unitNote.textContent = "";
-      unitNote.style.display = "none";
-    }
+    qaList.innerHTML="";
+    unit.questions.forEach((question,qi)=>{{
+      const card=document.createElement("div");
+      card.className="qa";
+      const q=document.createElement("div");
+      q.className="q";
+      q.textContent=question;
+      const a=document.createElement("div");
+      a.className="a";
+      a.textContent=unit.answers[qi][answerIndex]||"此題目前沒有設定答案。";
+      card.appendChild(q); card.appendChild(a); qaList.appendChild(card);
+    }});
 
-    qaList.innerHTML = "";
+    result.style.display="block";
+    result.scrollIntoView({{behavior:"smooth",block:"start"}});
+  }}
 
-    unit.questions.forEach((question, qi) => {
-      const answerGroup = unit.answers[qi];
-      const answerText = answerGroup && answerGroup[answerIndex]
-        ? answerGroup[answerIndex]
-        : "此題目前沒有設定答案。";
-
-      const card = document.createElement("div");
-      card.className = "qa";
-
-      const q = document.createElement("div");
-      q.className = "q";
-      q.textContent = question;
-
-      const a = document.createElement("div");
-      a.className = "a";
-      a.textContent = answerText;
-
-      card.appendChild(q);
-      card.appendChild(a);
-      qaList.appendChild(card);
-    });
-
-    result.style.display = "block";
-    result.scrollIntoView({behavior:"smooth", block:"start"});
-  }
-
-  function clearForm() {
-    seatInput.value = "";
-    document.querySelectorAll('input[name="unit"]').forEach(el => {
-      el.checked = false;
-    });
-    message.textContent = "";
-    result.style.display = "none";
-    qaList.innerHTML = "";
+  showBtn.addEventListener("click",showAnswers);
+  clearBtn.addEventListener("click",()=>{{
+    seatInput.value="";
+    document.querySelectorAll('input[name="unit"]').forEach(el=>el.checked=false);
+    message.textContent="";
+    result.style.display="none";
+    qaList.innerHTML="";
     seatInput.focus();
-  }
-
-  showBtn.addEventListener("click", showAnswers);
-  clearBtn.addEventListener("click", clearForm);
-  printBtn.addEventListener("click", () => window.print());
-  seatInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      showAnswers();
-    }
-  });
-});
+  }});
+  printBtn.addEventListener("click",()=>window.print());
+  seatInput.addEventListener("input",()=>{{seatInput.value=seatInput.value.replace(/\\D/g,"").slice(0,5);}});
+  seatInput.addEventListener("keydown",e=>{{
+    if(e.key==="Enter"){{e.preventDefault();showAnswers();}}
+  }});
+}});
 </script>
 </body>
 </html>
+"""
+
+out = Path("/mnt/data/探索未來_學習單答案查詢_815_816班_55組.html")
+out.write_text(out_html, encoding="utf-8")
+
+# 另存答案資料供後續修改
+json_out = Path("/mnt/data/探索未來_答案資料_815_816班_55組.json")
+json_out.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+print("已完成新版 HTML")
+print(f"HTML：{out}")
+print(f"答案資料：{json_out}")
+print(f"總座號數：{len(valid_seats)}")
+print("815班答案：沿用原28組")
+print("816班答案：新增27組")
+print("所有題目目前皆為55組答案")
